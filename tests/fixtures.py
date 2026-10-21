@@ -64,6 +64,9 @@ EVA = Member(
     soft=(PreferPace("eva-s1", "relaxed", 0.6),),
 )
 
+#: Diego, na demonstração: só pode viajar de 12 a 15 de julho (3 noites) e não declara preferências.
+DIEGO = Member("mem-diego", hard=(DateRange("diego-h1", date(2027, 7, 12), date(2027, 7, 15)),))
+
 JULY_TRIP = TripInput(
     window_start=date(2027, 7, 5),
     window_end=date(2027, 7, 26),

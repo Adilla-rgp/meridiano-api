@@ -81,4 +81,13 @@ Limitação: num grupo em que só uma pessoa declarou orçamento, quem souber di
 
 ## Dados de exemplo do front
 
-`python -m scripts.export_fixture` roda o motor na Viagem de julho, antes e depois da resposta de Eva, e grava `fixtures/july-trip.json` no formato do contrato do front. Os mocks do front leem uma cópia desse arquivo. Um teste falha se o arquivo gravado ficar diferente da saída atual do motor.
+`python -m scripts.export_fixture` roda o motor nos cenários da demonstração da Viagem de julho e grava `fixtures/july-trip.json` no formato do contrato do front:
+
+| Cenário | Quem respondeu | Para mostrar |
+| --- | --- | --- |
+| `before_eva_response` | Ana, Bruno, Carla | planos antes da convidada da demonstração |
+| `after_eva_response` | mais Eva | o plano recomendado da demonstração |
+| `eva_limits_only` | Eva remove a preferência de ritmo | `has_preferences = false` |
+| `after_diego_response` | mais Diego, só 3 noites | rodada sem plano viável |
+
+Cada rodada traz as restrições de quem respondeu. O mock do front usa a rodada cujas restrições batem com as respostas salvas. O arquivo também traz o catálogo e os limites de cada pessoa (`member_limits`). Os mocks do front leem uma cópia dele, e um teste falha se o arquivo gravado ficar diferente da saída atual do motor.

@@ -1,14 +1,21 @@
 """
-Roda o motor na Viagem de julho, antes e depois da resposta de Eva, e grava o
-resultado em JSON no formato do contrato do front (planner-vite/src/types/api.ts).
-Os mocks do front leem esse arquivo: o motor é a fonte dos números.
+Roda o motor nos cenários da demonstração da Viagem de julho e grava o resultado
+em JSON no formato do contrato do front (planner-vite/src/types/api.ts). Os mocks
+do front leem esse arquivo: o motor é a fonte dos números.
+
+Cenários, na ordem em que a demonstração chega a eles:
+- before_eva_response: Ana, Bruno e Carla;
+- after_eva_response: mais Eva, com a interpretação sugerida;
+- eva_limits_only: Eva remove a preferência de ritmo e fica só com limites;
+- after_diego_response: mais Diego, que só pode viajar 3 noites (nada é viável).
 
     python -m scripts.export_fixture                       # fixtures/july-trip.json
     python -m scripts.export_fixture --out ../planner-vite/src/mocks/fixtures/july-trip.json
 
-Cada rodada traz os planos sem id, trip_id e round, que o front (ou a API) atribui
-ao criar a rodada. Também vão os dados de entrada do motor (catálogo e restrições),
-para o front conferir que os mocks dele são os mesmos.
+Cada rodada traz as restrições de quem respondeu, para o mock escolher a rodada
+que corresponde às respostas salvas, e os planos sem id, trip_id e round, que o
+front (ou a API) atribui ao criar a rodada. O catálogo também vai, para o front
+conferir que os mocks dele são os mesmos.
 """
 
 import argparse
@@ -38,7 +45,7 @@ from engine.models import (
     TripInput,
 )
 from engine.privacy import limits_for_member
-from tests.fixtures import EVA, JULY_TRIP
+from tests.fixtures import DIEGO, EVA, JULY_TRIP
 
 TRIP_ID = "trip-julho"
 DEFAULT_OUT = Path("fixtures/july-trip.json")
@@ -150,44 +157,57 @@ def _member_limit(item: MemberLimit) -> dict:
     }
 
 
-def _round(trip: TripInput) -> dict:
+def _round(name: str, trip: TripInput) -> dict:
     result = run(trip)
+    members = sorted(trip.members, key=lambda item: item.id)
     return {
-        "responded_member_ids": sorted(member.id for member in trip.members),
+        "name": name,
+        "members": [_member(m) for m in members],
+        "alpha": result.alpha,
+        "alternatives_evaluated": result.alternatives_evaluated,
         "plans": [_plan(plan, result) for plan in result.plans],
-        "recommended_index": 0 if result.plans else None,
         "excluded_destinations": [_excluded(item) for item in result.excluded_destinations],
         "blocking_limits": [_blocking(item) for item in result.blocking_limits],
     }
 
 
+def scenarios() -> dict[str, TripInput]:
+    others = tuple(m for m in JULY_TRIP.members if m.id != EVA.id)
+    return {
+        "before_eva_response": replace(JULY_TRIP, members=others),
+        "after_eva_response": JULY_TRIP,
+        "eva_limits_only": replace(JULY_TRIP, members=(*others, replace(EVA, soft=()))),
+        "after_diego_response": replace(JULY_TRIP, members=(*JULY_TRIP.members, DIEGO)),
+    }
+
+
 def build() -> dict:
-    before = replace(JULY_TRIP, members=tuple(m for m in JULY_TRIP.members if m.id != EVA.id))
+    everyone = replace(JULY_TRIP, members=(*JULY_TRIP.members, DIEGO))
     return {
         "generated_by": "planner-api scripts/export_fixture.py",
         "trip_id": TRIP_ID,
-        "inputs": {
+        "trip": {
             "window_start": _iso(JULY_TRIP.window_start),
             "window_end": _iso(JULY_TRIP.window_end),
             "nights": JULY_TRIP.nights,
             "alpha": JULY_TRIP.alpha,
-            "destinations": [
-                {
-                    "id": d.id,
-                    "climate": d.climate,
-                    "pace": d.pace,
-                    "tags": list(d.tags),
-                    "fixed_cost": d.fixed_cost,
-                    "nightly_cost": d.nightly_cost,
-                }
-                for d in sorted(JULY_TRIP.destinations, key=lambda item: item.id)
-            ],
-            "members": [_member(m) for m in sorted(JULY_TRIP.members, key=lambda item: item.id)],
         },
-        "rounds": {"before_eva_response": _round(before), "after_eva_response": _round(JULY_TRIP)},
+        "destinations": [
+            {
+                "id": d.id,
+                "climate": d.climate,
+                "pace": d.pace,
+                "tags": list(d.tags),
+                "fixed_cost": d.fixed_cost,
+                "nightly_cost": d.nightly_cost,
+            }
+            for d in sorted(JULY_TRIP.destinations, key=lambda item: item.id)
+        ],
+        "rounds": [_round(name, trip) for name, trip in scenarios().items()],
+        # Os limites de cada um eliminam destinos independentemente dos outros.
         "member_limits": {
-            m.id: [_member_limit(item) for item in limits_for_member(JULY_TRIP, m.id)]
-            for m in sorted(JULY_TRIP.members, key=lambda item: item.id)
+            m.id: [_member_limit(item) for item in limits_for_member(everyone, m.id)]
+            for m in sorted(everyone.members, key=lambda item: item.id)
         },
     }
 
