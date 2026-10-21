@@ -77,7 +77,7 @@ def test_july_trip_explanations():
         "mem-carla": (
             "Ganhou o ritmo tranquilo que pediu. Abriu mão do destino que indicou e de um destino de serra."
         ),
-        "mem-eva": "Ganhou o ritmo tranquilo que pediu. O plano cabe no orçamento, mas no limite.",
+        "mem-eva": "Ganhou o ritmo tranquilo que pediu.",
     }
 
 
@@ -86,7 +86,10 @@ def test_short_variant_explains_lost_days():
     assert texts_by_member(short)["mem-ana"] == (
         "Ganhou o destino que indicou, com praia. Abriu mão de 2 dias de viagem."
     )
-    assert texts_by_member(short)["mem-eva"].endswith("O plano cabe no orçamento com folga.")
+    assert (
+        texts_by_member(short)["mem-eva"]
+        == "Ganhou o ritmo tranquilo que pediu. Abriu mão de 2 dias de viagem."
+    )
 
 
 def test_second_listed_destination_is_a_partial_gain():
@@ -226,5 +229,5 @@ def test_budget_exclusion_names_the_limit_but_not_the_value():
     tighter = replace(EVA, hard=(*EVA.hard[:1], Budget("eva-h2", 1000, all_inclusive=True), *EVA.hard[2:]))
     result = plans_of(run(trip_with(members=(ANA, BRUNO, CARLA, tighter))))
     paraty = next(item for item in result.excluded_destinations if item.destination_id == "dest-paraty")
-    assert paraty == ExcludedDestination("dest-paraty", "limit", (LimitRef("mem-eva", "budget"),), None)
+    assert paraty == ExcludedDestination("dest-paraty", "limit", (LimitRef(None, "budget"),), None)
     assert "1000" not in repr(result.excluded_destinations)

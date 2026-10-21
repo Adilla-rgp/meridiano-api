@@ -15,6 +15,7 @@ from engine.models import (
     PlanResult,
     TripInput,
 )
+from engine.privacy import group_ref
 from engine.scoring import Breakdown, balance_score, breakdown
 
 MAX_ALTERNATIVES = 3
@@ -159,7 +160,7 @@ def _blocking_limits(found: list[list[LimitKey]], kinds: dict[LimitKey, LimitKin
 
     refs: list[LimitRef] = []
     for key in kinds:  # ordem de participante e de limite
-        ref = LimitRef(key[0], kinds[key])
+        ref = group_ref(key[0], kinds[key])
         if key in blocking and ref not in refs:
             refs.append(ref)
     return tuple(refs)

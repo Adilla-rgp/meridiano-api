@@ -1,9 +1,10 @@
 from engine.models import Member, PreferClimate, PreferDestination, PreferPace, SoftConstraint
-from engine.scoring import DESTINATION_FIRST, NEUTRAL, Breakdown, Component
+from engine.scoring import DESTINATION_FIRST, NEUTRAL, Breakdown
 
-# Justificativa por regras, a partir dos mesmos termos da satisfação. Nunca
-# cita o valor do orçamento de ninguém: ele é confidencial. Frases completas e
-# sem supor gênero: falam do destino, do ritmo e do orçamento, não da pessoa.
+# Justificativa por regras, a partir dos mesmos termos da satisfação. O grupo
+# inteiro lê as justificativas, então elas não falam de orçamento: "cabe, mas no
+# limite" ao lado do custo do plano revelaria quase o valor (privacy.py). Frases
+# completas e sem supor gênero: falam do destino e do ritmo, não da pessoa.
 #
 # - Ganho: preferência declarada com valor a partir de GAIN_THRESHOLD.
 # - Concessão: preferência declarada abaixo do neutro. O que a pessoa não
@@ -12,7 +13,7 @@ from engine.scoring import DESTINATION_FIRST, NEUTRAL, Breakdown, Component
 # Exemplos:
 #   "Ganhou o destino que indicou, com praia."
 #   "Ganhou o ritmo tranquilo que pediu. Abriu mão do destino que indicou e de um destino de serra."
-#   "Abriu mão de 2 dias de viagem. O plano cabe no orçamento com folga."
+#   "Ganhou o ritmo tranquilo que pediu. Abriu mão de 2 dias de viagem."
 
 GAIN_THRESHOLD = 0.75
 #: Máximo de itens em "Ganhou …" e em "Abriu mão …".
@@ -21,11 +22,6 @@ MAX_ITEMS = 2
 PACE_LABEL = {"relaxed": "ritmo tranquilo", "balanced": "ritmo equilibrado", "intense": "ritmo agitado"}
 CLIMATE_LABEL = {"hot": "clima quente", "mild": "clima ameno", "cold": "clima frio"}
 CLIMATE_SEQUENCE = ("hot", "mild", "cold")
-
-#: Folga no orçamento (valor do termo, de 0,5 a 1) a partir da qual o texto diz "com folga".
-BUDGET_COMFORTABLE = 0.875
-#: Até aqui o texto diz "no limite".
-BUDGET_TIGHT = 0.625
 
 NO_PREFERENCES_TEXT = "Não indicou preferências."
 PARTIAL_TEXT = "O plano atende em parte ao que pediu."
@@ -60,14 +56,6 @@ def _place_attributes(items: list, attributes: list[str], phrase: str) -> list[s
     return [
         phrase if item is _ATTRIBUTES else item for item in items if item is not _ATTRIBUTES or attributes
     ]
-
-
-def _budget_sentence(item: Component) -> str:
-    if item.match >= BUDGET_COMFORTABLE:
-        return "O plano cabe no orçamento com folga."
-    if item.match <= BUDGET_TIGHT:
-        return "O plano cabe no orçamento, mas no limite."
-    return "O plano cabe no orçamento, com pouca folga."
 
 
 def explain(member: Member, scores: Breakdown, nights_lost: int, destination_climate: str) -> str:
@@ -128,9 +116,6 @@ def explain(member: Member, scores: Breakdown, nights_lost: int, destination_cli
         sentences.append(f"Ganhou {join_pt(gains[:MAX_ITEMS])}.")
     if concessions:
         sentences.append(f"Abriu mão {join_pt(concessions[:MAX_ITEMS])}.")
-    budget = next((item for item in scores.components if item.kind == "budget"), None)
-    if budget:
-        sentences.append(_budget_sentence(budget))
 
     if sentences:
         return " ".join(sentences)

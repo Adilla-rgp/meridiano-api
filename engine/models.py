@@ -149,10 +149,22 @@ LimitKind = Literal["date_range", "budget", "exclude_climate", "exclude_destinat
 
 @dataclass(frozen=True)
 class LimitRef:
-    """Qual limite, de quem. Só o tipo: o valor de orçamento é confidencial."""
+    """
+    Qual limite, de quem, como o grupo vê. Só o tipo, nunca o valor. Limite de
+    orçamento não identifica ninguém: member_id é nulo.
+    """
 
-    member_id: str
+    member_id: str | None
     kind: LimitKind
+
+
+@dataclass(frozen=True)
+class MemberLimit:
+    """Um limite da própria pessoa e os destinos da viagem que ele elimina sozinho, para a tela dela."""
+
+    constraint_id: str
+    kind: LimitKind
+    eliminated_destination_ids: tuple[str, ...]
 
 
 @dataclass(frozen=True)
