@@ -120,6 +120,10 @@ class TripInput:
 class MemberScore:
     member_id: str
     score: float
+    #: Falso para quem não declarou nenhuma preferência: fica fora do score do plano.
+    has_preferences: bool
+    #: Maior satisfação que a pessoa teria em qualquer candidato que respeita os limites do grupo.
+    best_possible: float
 
 
 @dataclass(frozen=True)
@@ -140,12 +144,36 @@ class PlanResult:
     explanation: tuple[MemberExplanation, ...]
 
 
+LimitKind = Literal["date_range", "budget", "exclude_climate", "exclude_destination"]
+
+
+@dataclass(frozen=True)
+class LimitRef:
+    """Qual limite, de quem. Só o tipo: o valor de orçamento é confidencial."""
+
+    member_id: str
+    kind: LimitKind
+
+
+@dataclass(frozen=True)
+class ExcludedDestination:
+    destination_id: str
+    #: "limit": nenhum candidato do destino respeita os limites; "lower_score": viável, com score menor.
+    reason: Literal["limit", "lower_score"]
+    #: Limites que eliminam o destino; vazio quando o motivo é score menor.
+    limits: tuple[LimitRef, ...]
+    #: Melhor score do destino entre as variantes; nulo quando o motivo é limite.
+    best_score: float | None
+
+
 @dataclass(frozen=True)
 class EngineResult:
     #: Do maior para o menor score; o primeiro é o recomendado.
     plans: tuple[PlanResult, ...]
     alpha: float
     alternatives_evaluated: int
+    #: Destinos da viagem que não aparecem em nenhum plano devolvido, na ordem do id.
+    excluded_destinations: tuple[ExcludedDestination, ...]
 
 
 @dataclass(frozen=True)

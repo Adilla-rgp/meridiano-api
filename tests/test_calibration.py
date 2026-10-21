@@ -16,7 +16,7 @@ from engine.models import (
     PreferTags,
     TripInput,
 )
-from engine.scoring import breakdown, destination_match, pace_match
+from engine.scoring import breakdown, climate_match, destination_match, pace_match
 
 # Critérios de aceite da calibração da satisfação.
 
@@ -113,3 +113,26 @@ def test_short_variant_never_raises_satisfaction():
     standard = Candidate(BEACH, 6, None, date(2027, 7, 10))
     short = Candidate(BEACH, 4, "roteiro curto", date(2027, 7, 10))
     assert breakdown(member, short, 6).satisfaction < breakdown(member, standard, 6).satisfaction
+
+
+@pytest.mark.parametrize(
+    ("preferred", "destination_climate", "expected"),
+    [
+        (frozenset({"hot"}), "hot", 1.0),
+        (frozenset({"hot"}), "mild", 0.5),
+        (frozenset({"hot"}), "cold", 0.0),
+        (frozenset({"hot", "cold"}), "mild", 0.5),
+    ],
+)
+def test_climate_is_ordinal_like_pace(preferred, destination_climate, expected):
+    assert climate_match(destination_climate, preferred) == expected
+
+
+@pytest.mark.parametrize(
+    ("tags", "expected"),
+    [(("praia",), 1.0), (("praia", "serra"), 0.5), (("serra", "trilhas"), 0.0)],
+)
+def test_tags_value_is_the_fraction_present(tags, expected):
+    member = Member("mem-a", soft=(PreferTags("a1", tags, 1.0),))
+    standard = Candidate(BEACH, 6, None, date(2027, 7, 10))
+    assert breakdown(member, standard, 6).components[0].match == expected

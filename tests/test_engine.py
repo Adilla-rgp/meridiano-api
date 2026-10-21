@@ -1,12 +1,21 @@
 import random
+from dataclasses import replace
 from datetime import date
 
 import pytest
 
 from engine import run
 from engine.candidates import generate_candidates, violations
-from engine.models import Budget, EngineInputError, EngineResult, Infeasible, Member
-from tests.fixtures import ANA, BRUNO, EVA, JULY_TRIP, trip_with
+from engine.models import (
+    Budget,
+    EngineInputError,
+    EngineResult,
+    ExcludedDestination,
+    Infeasible,
+    LimitRef,
+    Member,
+)
+from tests.fixtures import ANA, BRUNO, CARLA, EVA, JULY_TRIP, trip_with
 
 
 def plans_of(result) -> EngineResult:
@@ -156,3 +165,66 @@ def test_points_to_the_most_blocking_limit():
 def test_rejects_invalid_input(changes):
     with pytest.raises(EngineInputError):
         run(trip_with(**changes))
+
+
+# Quem não declarou preferências
+
+
+def test_member_without_preferences_stays_out_of_the_score():
+    result = plans_of(run(trip_with(members=(ANA, Member("mem-diego")))))
+    for plan in result.plans:
+        by_member = {item.member_id: item for item in plan.per_member_scores}
+        assert by_member["mem-diego"].has_preferences is False
+        assert by_member["mem-ana"].has_preferences is True
+        # Só Ana conta: com uma pessoa, média e mínimo são a satisfação dela.
+        assert plan.score == by_member["mem-ana"].score
+
+
+def test_nobody_with_preferences_breaks_ties_by_lowest_cost():
+    nobody = (Member("mem-a"), Member("mem-b"))
+    result = plans_of(run(trip_with(members=nobody)))
+    assert [plan.score for plan in result.plans] == [0.0, 0.0, 0.0]
+    assert [(plan.destination_id, plan.est_cost_per_person) for plan in result.plans] == [
+        ("dest-chapada", 980),
+        ("dest-lencois", 1050),
+        ("dest-jericoacoara", 1090),
+    ]
+
+
+# Melhor possível
+
+
+@pytest.mark.parametrize("alpha", [0.0, 0.5, 1.0])
+def test_best_possible_is_never_below_any_returned_plan(alpha):
+    result = plans_of(run(trip_with(alpha=alpha)))
+    for plan in result.plans:
+        for item in plan.per_member_scores:
+            assert item.best_possible >= item.score
+
+
+def test_july_trip_best_possible():
+    plan = plans_of(run(JULY_TRIP)).plans[0]
+    assert {item.member_id: item.best_possible for item in plan.per_member_scores} == {
+        "mem-ana": 1.0,
+        "mem-bruno": 1.0,  # em Jericoacoara
+        "mem-carla": 0.4818,  # a Chapada é vetada pelo limite de clima de Eva
+        "mem-eva": 0.9,
+    }
+
+
+# Destinos excluídos
+
+
+def test_july_trip_excluded_destinations():
+    assert plans_of(run(JULY_TRIP)).excluded_destinations == (
+        ExcludedDestination("dest-chapada", "limit", (LimitRef("mem-eva", "exclude_climate"),), None),
+        ExcludedDestination("dest-jericoacoara", "lower_score", (), 0.3358),
+    )
+
+
+def test_budget_exclusion_names_the_limit_but_not_the_value():
+    tighter = replace(EVA, hard=(*EVA.hard[:1], Budget("eva-h2", 1000, all_inclusive=True), *EVA.hard[2:]))
+    result = plans_of(run(trip_with(members=(ANA, BRUNO, CARLA, tighter))))
+    paraty = next(item for item in result.excluded_destinations if item.destination_id == "dest-paraty")
+    assert paraty == ExcludedDestination("dest-paraty", "limit", (LimitRef("mem-eva", "budget"),), None)
+    assert "1000" not in repr(result.excluded_destinations)

@@ -10,7 +10,8 @@ from engine.models import Budget, Member, PreferClimate, PreferDestination, Pref
 #
 # m_k é quanto o candidato atende cada preferência que a pessoa declarou. O que
 # ela não mencionou é neutro (0,5) e por isso fica fora da média: não puxa para
-# cima nem para baixo. Quem não declarou nada fica em 0,5.
+# cima nem para baixo. Quem não declarou nenhuma preferência fica em 0,5 e fora
+# do score do plano (run.py).
 #
 # Termos implícitos:
 # - folga no orçamento, só para quem tem limite de orçamento. Vai de 0,5 (cabe,
@@ -33,7 +34,8 @@ DESTINATION_LISTED = 0.75
 #: Destino que a pessoa não listou. Destino vetado é limite e nem chega aqui.
 DESTINATION_UNLISTED = 0.4
 
-CLIMATE_ORDER = {"hot": 0, "mild": 1, "cold": 2}
+#: Escala ordinal, como a do ritmo.
+CLIMATE_VALUE = {"hot": 0.0, "mild": 0.5, "cold": 1.0}
 PACE_VALUE = {"relaxed": 0.0, "balanced": 0.5, "intense": 1.0}
 
 BUDGET_WEIGHT = 0.5
@@ -76,6 +78,11 @@ class Breakdown:
     def satisfaction(self) -> float:
         return self.base * self.duration_factor
 
+    @property
+    def has_preferences(self) -> bool:
+        """Declarou ao menos uma preferência; o termo de orçamento não conta."""
+        return any(item.kind != "budget" for item in self.components)
+
 
 def _clamp(value: float) -> float:
     return max(0.0, min(1.0, value))
@@ -90,9 +97,8 @@ def destination_match(destination_id: str, preferred: tuple[str, ...]) -> float:
 
 
 def climate_match(destination_climate: str, preferred: frozenset[str]) -> float:
-    """Quente, ameno, frio: igual 1, vizinho 0,5, oposto 0."""
-    distance = min(abs(CLIMATE_ORDER[c] - CLIMATE_ORDER[destination_climate]) for c in preferred)
-    return 1 - distance / 2
+    """1 − |preferência − destino|; com mais de um clima pedido, vale o mais próximo."""
+    return max(1 - abs(CLIMATE_VALUE[c] - CLIMATE_VALUE[destination_climate]) for c in preferred)
 
 
 def pace_match(destination_pace: str, preferred: str) -> float:

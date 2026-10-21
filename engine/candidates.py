@@ -9,6 +9,7 @@ from engine.models import (
     ExcludeClimate,
     ExcludeDestination,
     HardConstraint,
+    LimitKind,
     Member,
     TripInput,
 )
@@ -65,6 +66,18 @@ def violates(candidate: Candidate, constraint: HardConstraint) -> bool:
             return candidate.destination.climate in climates
         case ExcludeDestination(destination_ids=ids):
             return candidate.destination.id in ids
+
+
+def limit_kind(constraint: HardConstraint) -> LimitKind:
+    match constraint:
+        case DateRange():
+            return "date_range"
+        case Budget():
+            return "budget"
+        case ExcludeClimate():
+            return "exclude_climate"
+        case ExcludeDestination():
+            return "exclude_destination"
 
 
 def violations(candidate: Candidate, members: tuple[Member, ...]) -> list[tuple[str, str]]:
