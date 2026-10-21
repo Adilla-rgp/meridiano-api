@@ -179,24 +179,25 @@ class ExcludedDestination:
 
 
 @dataclass(frozen=True)
+class BlockingLimit:
+    """Limite que elimina candidatos da rodada, como o grupo vê: orçamento sem member_id."""
+
+    member_id: str | None
+    kind: LimitKind
+    #: Quantos candidatos (destino × variante × dia de ida) este limite elimina.
+    eliminated_candidates: int
+
+
+@dataclass(frozen=True)
 class EngineResult:
-    #: Do maior para o menor score; o primeiro é o recomendado.
+    #: Do maior para o menor score; o primeiro é o recomendado. Vazio quando nada é viável.
     plans: tuple[PlanResult, ...]
     alpha: float
     alternatives_evaluated: int
     #: Destinos da viagem que não aparecem em nenhum plano devolvido, na ordem do id.
     excluded_destinations: tuple[ExcludedDestination, ...]
-
-
-@dataclass(frozen=True)
-class Infeasible:
-    """Nenhum candidato respeita todos os limites: aponta o que mais bloqueia."""
-
-    member_id: str
-    constraint_id: str
-    #: Quantos candidatos passariam se só este limite fosse retirado.
-    unlocked_alternatives: int
-    alternatives_evaluated: int
+    #: Só quando nada é viável: os limites que eliminam candidatos, do que mais elimina para o que menos.
+    blocking_limits: tuple[BlockingLimit, ...] = ()
 
 
 class EngineInputError(ValueError):

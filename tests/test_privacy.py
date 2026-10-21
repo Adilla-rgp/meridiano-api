@@ -14,10 +14,13 @@ from tests.fixtures import ANA, BRUNO, CARLA, EVA, JULY_TRIP, trip_with
 TIGHT_EVA = replace(EVA, hard=(*EVA.hard[:1], Budget("eva-h2", 1000, all_inclusive=True), *EVA.hard[2:]))
 BROKE = Member("mem-diego", hard=(Budget("diego-h1", 500, all_inclusive=True),))
 
+THREE_NIGHTS = Member("mem-diego", hard=(DateRange("diego-h1", date(2027, 7, 12), date(2027, 7, 15)),))
+
 GROUP_SCENARIOS = {
     "viagem de julho": JULY_TRIP,
     "orçamento elimina Paraty": trip_with(members=(ANA, BRUNO, CARLA, TIGHT_EVA)),
     "orçamento inviabiliza tudo": trip_with(members=(ANA, BRUNO, EVA, BROKE)),
+    "datas inviabilizam tudo, com orçamento no grupo": trip_with(members=(ANA, BRUNO, EVA, THREE_NIGHTS)),
 }
 
 
@@ -43,7 +46,7 @@ def test_group_output_never_ties_budget_to_a_member(trip_input):
 
 @pytest.mark.parametrize("trip_input", GROUP_SCENARIOS.values(), ids=GROUP_SCENARIOS.keys())
 def test_explanations_never_mention_budget(trip_input):
-    for plan in getattr(run(trip_input), "plans", ()):
+    for plan in run(trip_input).plans:
         for item in plan.explanation:
             assert "orçamento" not in item.text.lower()
 

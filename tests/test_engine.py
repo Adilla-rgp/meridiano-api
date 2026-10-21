@@ -7,11 +7,12 @@ import pytest
 from engine import run
 from engine.candidates import generate_candidates, violations
 from engine.models import (
+    BlockingLimit,
     Budget,
+    DateRange,
     EngineInputError,
     EngineResult,
     ExcludedDestination,
-    Infeasible,
     LimitRef,
     Member,
 )
@@ -144,12 +145,37 @@ def test_counts_every_generated_candidate():
 # Sem plano viável
 
 
-def test_points_to_the_most_blocking_limit():
+def test_member_who_can_only_travel_three_nights_blocks_every_plan():
+    # Seis noites fixadas, roteiro curto de quatro: três noites não cabem em nenhum.
+    three_nights = Member("mem-diego", hard=(DateRange("diego-h1", date(2027, 7, 12), date(2027, 7, 15)),))
+    result = run(trip_with(members=(ANA, BRUNO, CARLA, EVA, three_nights)))
+
+    assert result.plans == ()
+    total = result.alternatives_evaluated
+    assert result.blocking_limits[0] == BlockingLimit("mem-diego", "date_range", total)
+    assert [item.eliminated_candidates for item in result.blocking_limits] == sorted(
+        (item.eliminated_candidates for item in result.blocking_limits), reverse=True
+    )
+    assert {item.destination_id for item in result.excluded_destinations} == {
+        "dest-chapada",
+        "dest-jericoacoara",
+        "dest-lencois",
+        "dest-paraty",
+    }
+    assert all(item.reason == "limit" for item in result.excluded_destinations)
+
+
+def test_budget_blocking_limit_has_no_member():
     broke = Member("mem-diego", hard=(Budget("diego-h1", 500, all_inclusive=True),))
     result = run(trip_with(members=(ANA, BRUNO, EVA, broke)))
-    assert isinstance(result, Infeasible)
-    assert (result.member_id, result.constraint_id) == ("mem-diego", "diego-h1")
-    assert result.unlocked_alternatives > 0
+    assert result.plans == ()
+    # Os orçamentos de Eva e de Diego viram um só item, sem identificar ninguém.
+    budget = [item for item in result.blocking_limits if item.kind == "budget"]
+    assert budget == [BlockingLimit(None, "budget", result.alternatives_evaluated)]
+
+
+def test_feasible_round_has_no_blocking_limits():
+    assert plans_of(run(JULY_TRIP)).blocking_limits == ()
 
 
 # Entrada inválida

@@ -3,10 +3,10 @@ from collections import Counter
 from engine.candidates import Candidate, generate_candidates, limit_kind, violations
 from engine.explain import explain
 from engine.models import (
+    BlockingLimit,
     EngineInputError,
     EngineResult,
     ExcludedDestination,
-    Infeasible,
     LimitKind,
     LimitRef,
     Member,
@@ -26,9 +26,10 @@ SCORE_DIGITS = 4
 LimitKey = tuple[str, str]
 
 
-def run(trip: TripInput) -> EngineResult | Infeasible:
+def run(trip: TripInput) -> EngineResult:
     """
-    Gera até 3 alternativas, da mais para a menos justa. Determinístico: a mesma
+    Gera até 3 alternativas, da mais para a menos justa. Se nada respeita todos
+    os limites, devolve plans vazio e blocking_limits. Determinístico: a mesma
     entrada, em qualquer ordem de destinos ou participantes, dá o mesmo resultado.
     """
     _validate(trip)
@@ -37,7 +38,13 @@ def run(trip: TripInput) -> EngineResult | Infeasible:
     checked = [(candidate, violations(candidate, members)) for candidate in candidates]
 
     if all(found for _, found in checked):
-        return _find_blocker(members, [found for _, found in checked], len(candidates))
+        return EngineResult(
+            plans=(),
+            alpha=trip.alpha,
+            alternatives_evaluated=len(candidates),
+            excluded_destinations=_excluded(trip, members, checked, [], []),
+            blocking_limits=_blocking_limits(members, checked),
+        )
 
     # A satisfação não depende do dia de ida, então cada destino e variante fica
     # com o primeiro dia viável. Assim as 3 alternativas nunca são o mesmo
@@ -141,12 +148,12 @@ def _excluded(
             result.append(ExcludedDestination(destination.id, "lower_score", (), max(own)))
             continue
         found = [limits for candidate, limits in checked if candidate.destination.id == destination.id]
-        result.append(ExcludedDestination(destination.id, "limit", _blocking_limits(found, kinds), None))
+        result.append(ExcludedDestination(destination.id, "limit", _excluding_limits(found, kinds), None))
 
     return tuple(result)
 
 
-def _blocking_limits(found: list[list[LimitKey]], kinds: dict[LimitKey, LimitKind]) -> tuple[LimitRef, ...]:
+def _excluding_limits(found: list[list[LimitKey]], kinds: dict[LimitKey, LimitKind]) -> tuple[LimitRef, ...]:
     """
     Os limites que ferem todos os candidatos do destino. Se nenhum fere todos
     (o destino cai por combinação de limites), os que, retirados sozinhos,
@@ -166,18 +173,24 @@ def _blocking_limits(found: list[list[LimitKey]], kinds: dict[LimitKey, LimitKin
     return tuple(refs)
 
 
-def _find_blocker(members: tuple[Member, ...], blocked: list[list[LimitKey]], evaluated: int) -> Infeasible:
+def _blocking_limits(
+    members: tuple[Member, ...], checked: list[tuple[Candidate, list[LimitKey]]]
+) -> tuple[BlockingLimit, ...]:
     """
-    O limite que mais bloqueia é o que, retirado sozinho, libera mais candidatos.
-    Empate: o que aparece em mais violações; depois a ordem de participante e de limite.
+    Cada limite que elimina algum candidato, com quantos elimina. Os de
+    orçamento viram um só, sem member_id, e um candidato conta uma vez mesmo
+    que vários orçamentos o eliminem. Empate: ordem de participante e de limite.
     """
-    unlocked = Counter(found[0] for found in blocked if len(found) == 1)
-    total = Counter(pair for found in blocked for pair in found)
-    order = [(member.id, constraint.id) for member in members for constraint in member.hard]
-    member_id, constraint_id = max(order, key=lambda pair: (unlocked[pair], total[pair], -order.index(pair)))
-    return Infeasible(
-        member_id=member_id,
-        constraint_id=constraint_id,
-        unlocked_alternatives=unlocked[(member_id, constraint_id)],
-        alternatives_evaluated=evaluated,
-    )
+    kinds: dict[LimitKey, LimitKind] = {(m.id, c.id): limit_kind(c) for m in members for c in m.hard}
+    order: list[LimitRef] = []
+    for (member_id, _), kind in kinds.items():
+        ref = group_ref(member_id, kind)
+        if ref not in order:
+            order.append(ref)
+
+    counts: Counter[LimitRef] = Counter()
+    for _, found in checked:
+        counts.update({group_ref(member_id, kinds[(member_id, cid)]) for member_id, cid in found})
+
+    ranked = sorted((ref for ref in order if counts[ref]), key=lambda ref: (-counts[ref], order.index(ref)))
+    return tuple(BlockingLimit(ref.member_id, ref.kind, counts[ref]) for ref in ranked)
