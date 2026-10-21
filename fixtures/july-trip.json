@@ -1,0 +1,568 @@
+{
+  "generated_by": "planner-api scripts/export_fixture.py",
+  "trip_id": "trip-julho",
+  "inputs": {
+    "window_start": "2027-07-05",
+    "window_end": "2027-07-26",
+    "nights": 6,
+    "alpha": 0.5,
+    "destinations": [
+      {
+        "id": "dest-chapada",
+        "climate": "cold",
+        "pace": "balanced",
+        "tags": [
+          "serra",
+          "trilhas",
+          "cachoeiras"
+        ],
+        "fixed_cost": 320,
+        "nightly_cost": 110
+      },
+      {
+        "id": "dest-jericoacoara",
+        "climate": "hot",
+        "pace": "intense",
+        "tags": [
+          "praia",
+          "vida noturna",
+          "esportes"
+        ],
+        "fixed_cost": 370,
+        "nightly_cost": 120
+      },
+      {
+        "id": "dest-lencois",
+        "climate": "hot",
+        "pace": "relaxed",
+        "tags": [
+          "praia",
+          "dunas",
+          "natureza"
+        ],
+        "fixed_cost": 360,
+        "nightly_cost": 115
+      },
+      {
+        "id": "dest-paraty",
+        "climate": "mild",
+        "pace": "relaxed",
+        "tags": [
+          "praia",
+          "centro histórico",
+          "gastronomia"
+        ],
+        "fixed_cost": 480,
+        "nightly_cost": 150
+      }
+    ],
+    "members": [
+      {
+        "member_id": "mem-ana",
+        "hard": [],
+        "soft": [
+          {
+            "id": "ana-s1",
+            "kind": "prefer_destination",
+            "destination_ids": [
+              "dest-lencois"
+            ],
+            "weight": 0.8
+          },
+          {
+            "id": "ana-s2",
+            "kind": "prefer_tags",
+            "tags": [
+              "praia"
+            ],
+            "weight": 0.5
+          }
+        ]
+      },
+      {
+        "member_id": "mem-bruno",
+        "hard": [
+          {
+            "id": "bruno-h1",
+            "kind": "date_range",
+            "start": "2027-07-08",
+            "end": "2027-07-18"
+          }
+        ],
+        "soft": [
+          {
+            "id": "bruno-s1",
+            "kind": "prefer_destination",
+            "destination_ids": [
+              "dest-jericoacoara",
+              "dest-paraty"
+            ],
+            "weight": 0.9
+          },
+          {
+            "id": "bruno-s2",
+            "kind": "prefer_tags",
+            "tags": [
+              "praia"
+            ],
+            "weight": 0.6
+          },
+          {
+            "id": "bruno-s3",
+            "kind": "pace",
+            "pace": "intense",
+            "weight": 0.6
+          }
+        ]
+      },
+      {
+        "member_id": "mem-carla",
+        "hard": [],
+        "soft": [
+          {
+            "id": "carla-s1",
+            "kind": "prefer_destination",
+            "destination_ids": [
+              "dest-chapada"
+            ],
+            "weight": 0.9
+          },
+          {
+            "id": "carla-s2",
+            "kind": "prefer_tags",
+            "tags": [
+              "serra"
+            ],
+            "weight": 0.6
+          },
+          {
+            "id": "carla-s3",
+            "kind": "pace",
+            "pace": "relaxed",
+            "weight": 0.7
+          }
+        ]
+      },
+      {
+        "member_id": "mem-eva",
+        "hard": [
+          {
+            "id": "eva-h1",
+            "kind": "date_range",
+            "start": "2027-07-10",
+            "end": "2027-07-20"
+          },
+          {
+            "id": "eva-h2",
+            "kind": "budget",
+            "max_per_person": 1100,
+            "all_inclusive": true
+          },
+          {
+            "id": "eva-h3",
+            "kind": "exclude_climate",
+            "climates": [
+              "cold"
+            ]
+          }
+        ],
+        "soft": [
+          {
+            "id": "eva-s1",
+            "kind": "pace",
+            "pace": "relaxed",
+            "weight": 0.6
+          }
+        ]
+      }
+    ]
+  },
+  "rounds": {
+    "before_eva_response": {
+      "responded_member_ids": [
+        "mem-ana",
+        "mem-bruno",
+        "mem-carla"
+      ],
+      "plans": [
+        {
+          "destination_id": "dest-lencois",
+          "variant_label": null,
+          "start_date": "2027-07-08",
+          "end_date": "2027-07-14",
+          "est_cost_per_person": 1050,
+          "score": 0.5517,
+          "alpha": 0.5,
+          "alternatives_evaluated": 136,
+          "violated_limits": 0,
+          "per_member_scores": [
+            {
+              "member_id": "mem-ana",
+              "score": 1.0,
+              "has_preferences": true,
+              "best_possible": 1.0
+            },
+            {
+              "member_id": "mem-bruno",
+              "score": 0.4571,
+              "has_preferences": true,
+              "best_possible": 1.0
+            },
+            {
+              "member_id": "mem-carla",
+              "score": 0.4818,
+              "has_preferences": true,
+              "best_possible": 0.8409
+            }
+          ],
+          "explanation": [
+            {
+              "member_id": "mem-ana",
+              "text": "Ganhou o destino que indicou, com praia."
+            },
+            {
+              "member_id": "mem-bruno",
+              "text": "Ganhou um destino de praia. Abriu mão dos destinos que indicou e do ritmo agitado que pediu."
+            },
+            {
+              "member_id": "mem-carla",
+              "text": "Ganhou o ritmo tranquilo que pediu. Abriu mão do destino que indicou e de um destino de serra."
+            }
+          ]
+        },
+        {
+          "destination_id": "dest-paraty",
+          "variant_label": null,
+          "start_date": "2027-07-08",
+          "end_date": "2027-07-14",
+          "est_cost_per_person": 1380,
+          "score": 0.5275,
+          "alpha": 0.5,
+          "alternatives_evaluated": 136,
+          "violated_limits": 0,
+          "per_member_scores": [
+            {
+              "member_id": "mem-ana",
+              "score": 0.6308,
+              "has_preferences": true,
+              "best_possible": 1.0
+            },
+            {
+              "member_id": "mem-bruno",
+              "score": 0.6071,
+              "has_preferences": true,
+              "best_possible": 1.0
+            },
+            {
+              "member_id": "mem-carla",
+              "score": 0.4818,
+              "has_preferences": true,
+              "best_possible": 0.8409
+            }
+          ],
+          "explanation": [
+            {
+              "member_id": "mem-ana",
+              "text": "Ganhou um destino de praia. Abriu mão do destino que indicou."
+            },
+            {
+              "member_id": "mem-bruno",
+              "text": "Ganhou um dos destinos que indicou, com praia. Abriu mão do ritmo agitado que pediu."
+            },
+            {
+              "member_id": "mem-carla",
+              "text": "Ganhou o ritmo tranquilo que pediu. Abriu mão do destino que indicou e de um destino de serra."
+            }
+          ]
+        },
+        {
+          "destination_id": "dest-lencois",
+          "variant_label": "roteiro curto",
+          "start_date": "2027-07-08",
+          "end_date": "2027-07-12",
+          "est_cost_per_person": 820,
+          "score": 0.4966,
+          "alpha": 0.5,
+          "alternatives_evaluated": 136,
+          "violated_limits": 0,
+          "per_member_scores": [
+            {
+              "member_id": "mem-ana",
+              "score": 0.9,
+              "has_preferences": true,
+              "best_possible": 1.0
+            },
+            {
+              "member_id": "mem-bruno",
+              "score": 0.4114,
+              "has_preferences": true,
+              "best_possible": 1.0
+            },
+            {
+              "member_id": "mem-carla",
+              "score": 0.4336,
+              "has_preferences": true,
+              "best_possible": 0.8409
+            }
+          ],
+          "explanation": [
+            {
+              "member_id": "mem-ana",
+              "text": "Ganhou o destino que indicou, com praia. Abriu mão de 2 dias de viagem."
+            },
+            {
+              "member_id": "mem-bruno",
+              "text": "Ganhou um destino de praia. Abriu mão de 2 dias de viagem e dos destinos que indicou."
+            },
+            {
+              "member_id": "mem-carla",
+              "text": "Ganhou o ritmo tranquilo que pediu. Abriu mão de 2 dias de viagem e do destino que indicou."
+            }
+          ]
+        }
+      ],
+      "recommended_index": 0,
+      "excluded_destinations": [
+        {
+          "destination_id": "dest-chapada",
+          "reason": "lower_score",
+          "limits": [],
+          "best_score": 0.3566
+        },
+        {
+          "destination_id": "dest-jericoacoara",
+          "reason": "lower_score",
+          "limits": [],
+          "best_score": 0.3809
+        }
+      ],
+      "blocking_limits": []
+    },
+    "after_eva_response": {
+      "responded_member_ids": [
+        "mem-ana",
+        "mem-bruno",
+        "mem-carla",
+        "mem-eva"
+      ],
+      "plans": [
+        {
+          "destination_id": "dest-lencois",
+          "variant_label": null,
+          "start_date": "2027-07-10",
+          "end_date": "2027-07-16",
+          "est_cost_per_person": 1050,
+          "score": 0.574,
+          "alpha": 0.5,
+          "alternatives_evaluated": 136,
+          "violated_limits": 0,
+          "per_member_scores": [
+            {
+              "member_id": "mem-ana",
+              "score": 1.0,
+              "has_preferences": true,
+              "best_possible": 1.0
+            },
+            {
+              "member_id": "mem-bruno",
+              "score": 0.4571,
+              "has_preferences": true,
+              "best_possible": 1.0
+            },
+            {
+              "member_id": "mem-carla",
+              "score": 0.4818,
+              "has_preferences": true,
+              "best_possible": 0.4818
+            },
+            {
+              "member_id": "mem-eva",
+              "score": 0.8244,
+              "has_preferences": true,
+              "best_possible": 0.9
+            }
+          ],
+          "explanation": [
+            {
+              "member_id": "mem-ana",
+              "text": "Ganhou o destino que indicou, com praia."
+            },
+            {
+              "member_id": "mem-bruno",
+              "text": "Ganhou um destino de praia. Abriu mão dos destinos que indicou e do ritmo agitado que pediu."
+            },
+            {
+              "member_id": "mem-carla",
+              "text": "Ganhou o ritmo tranquilo que pediu. Abriu mão do destino que indicou e de um destino de serra."
+            },
+            {
+              "member_id": "mem-eva",
+              "text": "Ganhou o ritmo tranquilo que pediu."
+            }
+          ]
+        },
+        {
+          "destination_id": "dest-lencois",
+          "variant_label": "roteiro curto",
+          "start_date": "2027-07-10",
+          "end_date": "2027-07-14",
+          "est_cost_per_person": 820,
+          "score": 0.5363,
+          "alpha": 0.5,
+          "alternatives_evaluated": 136,
+          "violated_limits": 0,
+          "per_member_scores": [
+            {
+              "member_id": "mem-ana",
+              "score": 0.9,
+              "has_preferences": true,
+              "best_possible": 1.0
+            },
+            {
+              "member_id": "mem-bruno",
+              "score": 0.4114,
+              "has_preferences": true,
+              "best_possible": 1.0
+            },
+            {
+              "member_id": "mem-carla",
+              "score": 0.4336,
+              "has_preferences": true,
+              "best_possible": 0.4818
+            },
+            {
+              "member_id": "mem-eva",
+              "score": 0.9,
+              "has_preferences": true,
+              "best_possible": 0.9
+            }
+          ],
+          "explanation": [
+            {
+              "member_id": "mem-ana",
+              "text": "Ganhou o destino que indicou, com praia. Abriu mão de 2 dias de viagem."
+            },
+            {
+              "member_id": "mem-bruno",
+              "text": "Ganhou um destino de praia. Abriu mão de 2 dias de viagem e dos destinos que indicou."
+            },
+            {
+              "member_id": "mem-carla",
+              "text": "Ganhou o ritmo tranquilo que pediu. Abriu mão de 2 dias de viagem e do destino que indicou."
+            },
+            {
+              "member_id": "mem-eva",
+              "text": "Ganhou o ritmo tranquilo que pediu. Abriu mão de 2 dias de viagem."
+            }
+          ]
+        },
+        {
+          "destination_id": "dest-paraty",
+          "variant_label": "roteiro curto",
+          "start_date": "2027-07-10",
+          "end_date": "2027-07-14",
+          "est_cost_per_person": 1080,
+          "score": 0.4995,
+          "alpha": 0.5,
+          "alternatives_evaluated": 136,
+          "violated_limits": 0,
+          "per_member_scores": [
+            {
+              "member_id": "mem-ana",
+              "score": 0.5677,
+              "has_preferences": true,
+              "best_possible": 1.0
+            },
+            {
+              "member_id": "mem-bruno",
+              "score": 0.5464,
+              "has_preferences": true,
+              "best_possible": 1.0
+            },
+            {
+              "member_id": "mem-carla",
+              "score": 0.4336,
+              "has_preferences": true,
+              "best_possible": 0.4818
+            },
+            {
+              "member_id": "mem-eva",
+              "score": 0.714,
+              "has_preferences": true,
+              "best_possible": 0.9
+            }
+          ],
+          "explanation": [
+            {
+              "member_id": "mem-ana",
+              "text": "Ganhou um destino de praia. Abriu mão de 2 dias de viagem e do destino que indicou."
+            },
+            {
+              "member_id": "mem-bruno",
+              "text": "Ganhou um dos destinos que indicou, com praia. Abriu mão de 2 dias de viagem e do ritmo agitado que pediu."
+            },
+            {
+              "member_id": "mem-carla",
+              "text": "Ganhou o ritmo tranquilo que pediu. Abriu mão de 2 dias de viagem e do destino que indicou."
+            },
+            {
+              "member_id": "mem-eva",
+              "text": "Ganhou o ritmo tranquilo que pediu. Abriu mão de 2 dias de viagem."
+            }
+          ]
+        }
+      ],
+      "recommended_index": 0,
+      "excluded_destinations": [
+        {
+          "destination_id": "dest-chapada",
+          "reason": "limit",
+          "limits": [
+            {
+              "member_id": "mem-eva",
+              "kind": "exclude_climate"
+            }
+          ],
+          "best_score": null
+        },
+        {
+          "destination_id": "dest-jericoacoara",
+          "reason": "lower_score",
+          "limits": [],
+          "best_score": 0.3358
+        }
+      ],
+      "blocking_limits": []
+    }
+  },
+  "member_limits": {
+    "mem-ana": [],
+    "mem-bruno": [
+      {
+        "constraint_id": "bruno-h1",
+        "kind": "date_range",
+        "eliminated_destination_ids": []
+      }
+    ],
+    "mem-carla": [],
+    "mem-eva": [
+      {
+        "constraint_id": "eva-h1",
+        "kind": "date_range",
+        "eliminated_destination_ids": []
+      },
+      {
+        "constraint_id": "eva-h2",
+        "kind": "budget",
+        "eliminated_destination_ids": []
+      },
+      {
+        "constraint_id": "eva-h3",
+        "kind": "exclude_climate",
+        "eliminated_destination_ids": [
+          "dest-chapada"
+        ]
+      }
+    ]
+  }
+}
