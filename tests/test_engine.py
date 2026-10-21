@@ -46,33 +46,43 @@ def test_july_trip_alternatives_and_order():
 
 
 def test_july_trip_member_scores():
+    # Regressão: números da calibração de 21/10/2026.
     plan = plans_of(run(JULY_TRIP)).plans[0]
     assert scores_by_member(plan) == {
         "mem-ana": 1.0,
-        "mem-bruno": 0.375,
-        "mem-carla": 0.4,
-        "mem-eva": pytest.approx(0.724, abs=1e-4),
+        "mem-bruno": 0.4571,
+        "mem-carla": 0.4818,
+        "mem-eva": 0.8244,
     }
-    assert plan.score == pytest.approx(0.5 * (1.0 + 0.375 + 0.4 + 0.724026) / 4 + 0.5 * 0.375, abs=1e-4)
+    assert plan.score == 0.574
+    assert [plan.score for plan in plans_of(run(JULY_TRIP)).plans] == [0.574, 0.5363, 0.4995]
 
 
 def test_july_trip_explanations():
     texts = texts_by_member(plans_of(run(JULY_TRIP)).plans[0])
     assert texts == {
-        "mem-ana": "Ganhou o destino preferido e praia.",
-        "mem-bruno": "Ganhou praia. Abriu mão do destino preferido e de ritmo agitado.",
-        "mem-carla": "Ganhou ritmo tranquilo. Abriu mão do destino preferido e de serra.",
-        "mem-eva": "Ganhou ritmo tranquilo. Dentro do orçamento, mas no limite.",
+        "mem-ana": "Ganhou o destino que indicou, com praia.",
+        "mem-bruno": (
+            "Ganhou um destino de praia. Abriu mão dos destinos que indicou e do ritmo agitado que pediu."
+        ),
+        "mem-carla": (
+            "Ganhou o ritmo tranquilo que pediu. Abriu mão do destino que indicou e de um destino de serra."
+        ),
+        "mem-eva": "Ganhou o ritmo tranquilo que pediu. O plano cabe no orçamento, mas no limite.",
     }
 
 
 def test_short_variant_explains_lost_days():
     short = plans_of(run(JULY_TRIP)).plans[1]
-    assert (
-        texts_by_member(short)["mem-ana"]
-        == "Ganhou o destino preferido e praia. Abriu mão de 2 dias de viagem."
+    assert texts_by_member(short)["mem-ana"] == (
+        "Ganhou o destino que indicou, com praia. Abriu mão de 2 dias de viagem."
     )
-    assert texts_by_member(short)["mem-eva"].endswith("Sobra folga no orçamento.")
+    assert texts_by_member(short)["mem-eva"].endswith("O plano cabe no orçamento com folga.")
+
+
+def test_second_listed_destination_is_a_partial_gain():
+    paraty = plans_of(run(JULY_TRIP)).plans[2]
+    assert texts_by_member(paraty)["mem-bruno"].startswith("Ganhou um dos destinos que indicou, com praia.")
 
 
 # Propriedades
@@ -102,10 +112,11 @@ def test_explanations_never_reveal_budget():
             assert "1100" not in item.text and "1.100" not in item.text
 
 
-def test_member_without_preferences_is_fully_satisfied_on_standard_plan():
+def test_member_without_preferences_is_neutral():
     result = plans_of(run(trip_with(members=(ANA, Member("mem-diego")))))
     standard = next(plan for plan in result.plans if plan.variant_label is None)
-    assert scores_by_member(standard)["mem-diego"] == 1.0
+    assert scores_by_member(standard)["mem-diego"] == 0.5
+    assert texts_by_member(standard)["mem-diego"] == "Não indicou preferências."
 
 
 def test_alpha_one_protects_worst_off():

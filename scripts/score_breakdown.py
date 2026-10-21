@@ -9,7 +9,7 @@ import sys
 from engine import run
 from engine.candidates import generate_candidates
 from engine.models import EngineResult
-from engine.scoring import components, satisfaction
+from engine.scoring import breakdown
 from tests.fixtures import JULY_TRIP
 
 
@@ -28,10 +28,13 @@ def main() -> None:
     print(f"{candidate.destination.name}, {label}, {plan.start_date} a {plan.end_date}, score {plan.score}\n")
 
     for member in sorted(JULY_TRIP.members, key=lambda item: item.id):
-        items = components(member, candidate, JULY_TRIP.nights)
-        print(f"{member.id}: satisfação {satisfaction(items):.4f}")
+        scores = breakdown(member, candidate, JULY_TRIP.nights)
+        print(
+            f"{member.id}: satisfação {scores.satisfaction:.4f} "
+            f"(média {scores.base:.4f} × duração {scores.duration_factor:.2f})"
+        )
         print(f"  {'termo':<12} {'origem':<10} {'peso':>5} {'valor':>6} {'peso × valor':>13}")
-        for item in items:
+        for item in scores.components:
             print(
                 f"  {item.kind:<12} {item.source_id:<10} {item.weight:>5.2f} "
                 f"{item.match:>6.3f} {item.weight * item.match:>13.3f}"

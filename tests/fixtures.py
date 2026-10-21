@@ -33,7 +33,7 @@ PARATY = Destination(
 ANA = Member(
     "mem-ana",
     soft=(
-        PreferDestination("ana-s1", frozenset({"dest-lencois"}), 0.8),
+        PreferDestination("ana-s1", ("dest-lencois",), 0.8),
         PreferTags("ana-s2", ("praia",), 0.5),
     ),
 )
@@ -41,7 +41,7 @@ BRUNO = Member(
     "mem-bruno",
     hard=(DateRange("bruno-h1", date(2027, 7, 8), date(2027, 7, 18)),),
     soft=(
-        PreferDestination("bruno-s1", frozenset({"dest-jericoacoara", "dest-paraty"}), 0.9),
+        PreferDestination("bruno-s1", ("dest-jericoacoara", "dest-paraty"), 0.9),
         PreferTags("bruno-s2", ("praia",), 0.6),
         PreferPace("bruno-s3", "intense", 0.6),
     ),
@@ -49,7 +49,7 @@ BRUNO = Member(
 CARLA = Member(
     "mem-carla",
     soft=(
-        PreferDestination("carla-s1", frozenset({"dest-chapada"}), 0.9),
+        PreferDestination("carla-s1", ("dest-chapada",), 0.9),
         PreferTags("carla-s2", ("serra",), 0.6),
         PreferPace("carla-s3", "relaxed", 0.7),
     ),

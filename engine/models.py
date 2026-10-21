@@ -78,7 +78,8 @@ class PreferClimate:
 @dataclass(frozen=True)
 class PreferDestination:
     id: str
-    destination_ids: frozenset[str]
+    #: Em ordem de preferência: o primeiro é o escolhido.
+    destination_ids: tuple[str, ...]
     weight: float
 
 

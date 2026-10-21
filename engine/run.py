@@ -1,7 +1,7 @@
 from collections import Counter
 
 from engine.candidates import Candidate, generate_candidates, violations
-from engine.explain import CLIMATE_LABEL, PACE_LABEL, explain, join_pt
+from engine.explain import explain
 from engine.models import (
     EngineInputError,
     EngineResult,
@@ -10,11 +10,9 @@ from engine.models import (
     MemberExplanation,
     MemberScore,
     PlanResult,
-    PreferClimate,
-    PreferPace,
     TripInput,
 )
-from engine.scoring import CLIMATE_ORDER, balance_score, components, satisfaction
+from engine.scoring import balance_score, breakdown
 
 MAX_ALTERNATIVES = 3
 #: Casas decimais dos scores devolvidos; a ordenação usa o valor arredondado.
@@ -73,26 +71,15 @@ def _validate(trip: TripInput) -> None:
         raise EngineInputError("Informe pelo menos um participante.")
 
 
-def _labels(member: Member) -> dict[str, str]:
-    """Rótulo de cada preferência de clima e ritmo, para as justificativas."""
-    labels: dict[str, str] = {}
-    for pref in member.soft:
-        match pref:
-            case PreferPace(pace=pace):
-                labels[pref.id] = PACE_LABEL[pace]
-            case PreferClimate(climates=climates) if climates:
-                labels[pref.id] = join_pt([CLIMATE_LABEL[c] for c in sorted(climates, key=CLIMATE_ORDER.get)])
-    return labels
-
-
 def _score(candidate: Candidate, members: tuple[Member, ...], trip: TripInput) -> PlanResult:
     per_member: list[MemberScore] = []
     texts: list[MemberExplanation] = []
+    nights_lost = trip.nights - candidate.nights
     for member in members:
-        items = components(member, candidate, trip.nights)
-        per_member.append(MemberScore(member.id, satisfaction(items)))
+        scores = breakdown(member, candidate, trip.nights)
+        per_member.append(MemberScore(member.id, scores.satisfaction))
         texts.append(
-            MemberExplanation(member.id, explain(items, _labels(member), trip.nights - candidate.nights))
+            MemberExplanation(member.id, explain(member, scores, nights_lost, candidate.destination.climate))
         )
 
     score = balance_score([item.score for item in per_member], trip.alpha)
