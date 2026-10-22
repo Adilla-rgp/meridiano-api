@@ -48,6 +48,8 @@ MIN_BUDGET = 50
 ALL_INCLUSIVE = re.compile(r"\b(tudo inclu\w*|com tudo|incluindo tudo|all inclusive)\b")
 
 NEGATION = re.compile(r"\b(nao|nada de|nada|sem|odeio|detesto|evito|evitar|menos|fora|nunca|jamais)\b")
+#: Negação logo depois de um nome: "Chapada não", "Paraty nem pensar".
+NEGATION_AFTER = re.compile(r"\s*(nao|nem pensar|jamais|nunca|(?:esta|ta) fora)\b")
 LIKING = re.compile(r"\b(prefiro|preferencia|gosto|curto|quero|queria|adoro|amo|adoraria)\b")
 INTENSIFIER = re.compile(r"\b(muito|bem|demais|super|por favor|mesmo|total)\b")
 #: Fim de oração: uma negação antes dele não vale para o que vem depois.
@@ -102,6 +104,9 @@ class _Text:
 
     def negated(self, start: int) -> bool:
         return bool(NEGATION.search(self.clause_before(start)))
+
+    def negated_after(self, end: int) -> bool:
+        return bool(NEGATION_AFTER.match(self.value, end))
 
     def liked(self, start: int) -> bool:
         return bool(LIKING.search(self.clause_before(start)))
@@ -239,7 +244,8 @@ def _destinations(text: _Text, destinations: tuple[engine.Destination, ...]) -> 
     mentions: list[tuple[int, str, bool]] = []
     for alias, destination_id in _aliases(destinations).items():
         for match in re.finditer(rf"\b{re.escape(alias)}\b", text.value):
-            mentions.append((match.start(), destination_id, text.negated(match.start())))
+            negated = text.negated(match.start()) or text.negated_after(match.end())
+            mentions.append((match.start(), destination_id, negated))
     excluded = sorted({destination_id for _, destination_id, negated in mentions if negated})
     preferred: list[str] = []
     for _, destination_id, _ in sorted(mentions):
