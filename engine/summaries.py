@@ -45,14 +45,14 @@ def _day(value: date) -> str:
 
 
 def format_date_range(start: date, end: date) -> str:
-    """ "5 a 26 de julho" ou "28 de junho a 3 de julho", como o front."""
+    """Como no front: "5 a 26 de julho" ou "28 de junho a 3 de julho"."""
     if (start.year, start.month) == (end.year, end.month):
         return f"{_day(start)} a {_day(end)} de {MONTHS[end.month - 1]}"
     return f"{_day(start)} de {MONTHS[start.month - 1]} a {_day(end)} de {MONTHS[end.month - 1]}"
 
 
 def format_currency(value: float) -> str:
-    """ "R$ 1.100", sem centavos."""
+    """Sem centavos: "R$ 1.100"."""
     return "R$ " + f"{round(value):,}".replace(",", ".")
 
 
@@ -67,7 +67,7 @@ def _climates(climates: frozenset[Climate]) -> str:
 
 
 def destination_preference_summary(names: list[str]) -> str:
-    """ "Lençóis Maranhenses como primeira opção" ou "Jericoacoara, depois Paraty"."""
+    """Na ordem: "Lençóis Maranhenses como primeira opção" ou "Jericoacoara, depois Paraty"."""
     if len(names) == 1:
         return f"{names[0]} como primeira opção"
     return ", depois ".join(names)
