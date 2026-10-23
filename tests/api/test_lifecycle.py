@@ -133,12 +133,9 @@ def test_full_cycle(client, july):
     third = client.post(f"/trips/{july.id}/plans", headers=july.admin).json()
     engine_round = ENGINE_ROUNDS["after_diego_response"]
     assert third["round"] == 3 and third["plans"] == [] and third["recommended_plan_id"] is None
-    # No empate de eliminated_candidates, o motor ordena pelo id do participante,
-    # que aqui é um UUID: compara sem depender dessa ordem.
-    expected = with_api_ids(engine_round["blocking_limits"], july.member_ids)
-    assert sorted(third["blocking_limits"], key=str) == sorted(expected, key=str)
-    counts = [limit["eliminated_candidates"] for limit in third["blocking_limits"]]
-    assert counts == sorted(counts, reverse=True)
+    # No empate de eliminated_candidates vale a ordem do convite, igual no motor
+    # e na API, mesmo com os ids da API sendo UUIDs.
+    assert third["blocking_limits"] == with_api_ids(engine_round["blocking_limits"], july.member_ids)
     assert client.get(f"/trips/{july.id}", headers=july.admin).json()["status"] == "collecting"
 
     # Reagir a um plano de rodada anterior não vale.

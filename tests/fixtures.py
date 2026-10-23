@@ -36,6 +36,7 @@ ANA = Member(
         PreferDestination("ana-s1", ("dest-lencois",), 0.8),
         PreferTags("ana-s2", ("praia",), 0.5),
     ),
+    position=0,
 )
 BRUNO = Member(
     "mem-bruno",
@@ -45,6 +46,7 @@ BRUNO = Member(
         PreferTags("bruno-s2", ("praia",), 0.6),
         PreferPace("bruno-s3", "intense", 0.6),
     ),
+    position=1,
 )
 CARLA = Member(
     "mem-carla",
@@ -53,6 +55,7 @@ CARLA = Member(
         PreferTags("carla-s2", ("serra",), 0.6),
         PreferPace("carla-s3", "relaxed", 0.7),
     ),
+    position=2,
 )
 EVA = Member(
     "mem-eva",
@@ -62,10 +65,11 @@ EVA = Member(
         ExcludeClimate("eva-h3", frozenset({"cold"})),
     ),
     soft=(PreferPace("eva-s1", "relaxed", 0.6),),
+    position=3,
 )
 
 #: Diego, na demonstração: só pode viajar de 12 a 15 de julho (3 noites) e não declara preferências.
-DIEGO = Member("mem-diego", hard=(DateRange("diego-h1", date(2027, 7, 12), date(2027, 7, 15)),))
+DIEGO = Member("mem-diego", hard=(DateRange("diego-h1", date(2027, 7, 12), date(2027, 7, 15)),), position=4)
 
 JULY_TRIP = TripInput(
     window_start=date(2027, 7, 5),

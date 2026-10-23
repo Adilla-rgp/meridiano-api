@@ -16,7 +16,7 @@ from engine.models import (
     LimitRef,
     Member,
 )
-from tests.fixtures import ANA, BRUNO, CARLA, EVA, JULY_TRIP, trip_with
+from tests.fixtures import ANA, BRUNO, CARLA, DIEGO, EVA, JULY_TRIP, trip_with
 
 
 def plans_of(result) -> EngineResult:
@@ -163,6 +163,19 @@ def test_member_who_can_only_travel_three_nights_blocks_every_plan():
         "dest-paraty",
     }
     assert all(item.reason == "limit" for item in result.excluded_destinations)
+
+
+def test_blocking_limit_ties_follow_invite_order():
+    # Bruno e Eva eliminam 88 candidatos cada um pela data. Na ordem do convite
+    # vem quem foi convidado antes, mesmo que o id venha depois.
+    members = (ANA, CARLA, replace(BRUNO, position=5), EVA, DIEGO)
+    tied = [
+        item.member_id
+        for item in run(trip_with(members=members)).blocking_limits
+        if item.kind == "date_range" and item.eliminated_candidates == 88
+    ]
+    assert tied == ["mem-eva", "mem-bruno"]
+    assert run(trip_with(members=(*JULY_TRIP.members, DIEGO))).blocking_limits[1].member_id == "mem-bruno"
 
 
 def test_budget_blocking_limit_has_no_member():

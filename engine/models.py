@@ -100,6 +100,8 @@ class Member:
     id: str
     hard: tuple[HardConstraint, ...] = ()
     soft: tuple[SoftConstraint, ...] = ()
+    #: Ordem do convite (0 é quem organiza). Só desempata listas; nunca muda um score.
+    position: int = 0
 
 
 @dataclass(frozen=True)

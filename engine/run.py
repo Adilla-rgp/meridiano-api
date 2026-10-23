@@ -179,9 +179,10 @@ def _blocking_limits(
     """
     Cada limite que elimina algum candidato, com quantos elimina. Os de
     orçamento viram um só, sem member_id, e um candidato conta uma vez mesmo
-    que vários orçamentos o eliminem. Empate: ordem de participante e de limite.
+    que vários orçamentos o eliminem. Empate: ordem do convite e do limite.
     """
-    kinds: dict[LimitKey, LimitKind] = {(m.id, c.id): limit_kind(c) for m in members for c in m.hard}
+    by_invite = sorted(members, key=lambda item: (item.position, item.id))
+    kinds: dict[LimitKey, LimitKind] = {(m.id, c.id): limit_kind(c) for m in by_invite for c in m.hard}
     order: list[LimitRef] = []
     for (member_id, _), kind in kinds.items():
         ref = group_ref(member_id, kind)

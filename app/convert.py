@@ -1,6 +1,7 @@
 from datetime import date
 
 from app import models, schemas
+from app.parsing import ParseContext
 from engine import models as engine
 from engine.summaries import hard_summary, soft_summary
 
@@ -63,9 +64,12 @@ def engine_soft(item: dict) -> engine.SoftConstraint:
     raise ValueError(f"Preferência desconhecida: {item['kind']}")
 
 
-def engine_member(member_id: str, hard: list[dict], soft: list[dict]) -> engine.Member:
+def engine_member(member_id: str, hard: list[dict], soft: list[dict], position: int = 0) -> engine.Member:
     return engine.Member(
-        member_id, tuple(engine_hard(item) for item in hard), tuple(engine_soft(item) for item in soft)
+        member_id,
+        tuple(engine_hard(item) for item in hard),
+        tuple(engine_soft(item) for item in soft),
+        position,
     )
 
 
@@ -79,6 +83,15 @@ def trip_input(
         alpha=trip.alpha,
         destinations=tuple(engine_destination(row) for row in destinations),
         members=tuple(members),
+    )
+
+
+def parse_context(trip: models.Trip, destinations: list[models.CatalogDestination]) -> ParseContext:
+    return ParseContext(
+        window_start=trip.date_window_start,
+        window_end=trip.date_window_end,
+        nights=trip.nights,
+        destinations=tuple(engine_destination(row) for row in destinations),
     )
 
 

@@ -56,7 +56,7 @@ Quando nenhum candidato respeita todos os limites, a rodada devolve:
 
 - `plans: []`;
 - `excluded_destinations`, com todos os destinos e motivo `limit`;
-- `blocking_limits`: cada limite que elimina algum candidato, com `kind`, `member_id` (nulo no orçamento) e `eliminated_candidates`, do que mais elimina para o que menos. No empate, vale a ordem de participante e de limite.
+- `blocking_limits`: cada limite que elimina algum candidato, com `kind`, `member_id` (nulo no orçamento) e `eliminated_candidates`, do que mais elimina para o que menos. No empate, vale a ordem do convite (`position` do participante; quem organiza primeiro) e a do limite. O id só desempata quem tem a mesma posição.
 
 Exemplo: com 6 noites fixadas, quem só pode viajar 3 noites elimina todos os candidatos, inclusive o roteiro curto, de 4 noites. Esse limite aparece em primeiro, com `eliminated_candidates` igual a `alternatives_evaluated`. A tela pode sugerir reduzir as noites da viagem.
 
@@ -72,6 +72,13 @@ O valor do orçamento é confidencial, e quem tem limite de orçamento também n
 - Um teste percorre todas as saídas de grupo em vários cenários e falha se encontrar `kind: "budget"` junto com um `member_id`.
 
 Limitação: num grupo em que só uma pessoa declarou orçamento, quem souber disso por fora sabe de quem é o "budget". As satisfações dessa pessoa também variam com a folga, o que permite inferir algo comparando planos de custos diferentes.
+
+## Entre rodadas
+
+Regras em `engine/rounds.py`:
+
+- **Recusa confirmada:** as restrições de quem recusou são revistas pelo que a pessoa confirmou do motivo. Limites novos se somam aos anteriores (valem todos). Uma preferência nova substitui a anterior do mesmo tipo, porque é a opinião mais recente; as de outros tipos ficam.
+- **Acordo:** a viagem fecha quando todos que responderam aceitaram o plano recomendado da rodada mais recente (aceito ou aceito com ressalva) e ninguém o recusou. Aceitar outra alternativa não conta.
 
 ## Limitações conhecidas
 
