@@ -5,12 +5,38 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app import convert, models, queries, schemas
+from app.parsing import ConstraintParser
 from app.security import hash_token, new_token
 from engine import run
 from engine.models import EngineInputError
+from engine.rounds import is_agreed, revise
 
 # Escritas usadas pelas rotas e pelo comando que cria a viagem de demonstração.
 # Validam formato e referências; quem decide é o motor.
+
+TRIP_CLOSED = "A viagem já fechou: todos aceitaram o plano final."
+OLD_ROUND = "Este plano é de uma rodada anterior. Veja a rodada mais recente."
+
+
+def ensure_open(trip: models.Trip) -> None:
+    """Depois do acordo, nada muda: nem respostas, nem reações, nem rodadas."""
+    if trip.status == "agreed":
+        raise HTTPException(409, TRIP_CLOSED)
+
+
+def ensure_latest_round(session: Session, plan: models.Plan) -> None:
+    if plan.round != queries.latest_round(session, plan.trip_id):
+        raise HTTPException(409, OLD_ROUND)
+
+
+def _check_destinations(
+    destinations: list[models.CatalogDestination],
+    items: list[schemas.HardConstraint | schemas.SoftConstraint],
+) -> None:
+    trip_ids = {row.id for row in destinations}
+    cited = {destination_id for item in items for destination_id in getattr(item, "destination_ids", [])}
+    if unknown := sorted(cited - trip_ids):
+        raise HTTPException(422, f"Destino que não está na viagem: {', '.join(unknown)}.")
 
 
 def create_trip(session: Session, data: schemas.CreateTripInput) -> tuple[models.Trip, str, str]:
@@ -82,15 +108,7 @@ def save_constraints(
 ) -> models.ConstraintSet:
     """Nova versão das restrições confirmadas; os resumos que faltam vêm do motor."""
     destinations = queries.trip_destinations(session, member.trip_id)
-    trip_ids = {row.id for row in destinations}
-    cited = {
-        destination_id
-        for item in [*data.hard, *data.soft]
-        for destination_id in getattr(item, "destination_ids", [])
-    }
-    if unknown := sorted(cited - trip_ids):
-        raise HTTPException(422, f"Destino que não está na viagem: {', '.join(unknown)}.")
-
+    _check_destinations(destinations, [*data.hard, *data.soft])
     data = convert.with_summaries(data, destinations)
     previous = queries.latest_constraints(session, member.id)
     record = models.ConstraintSet(
@@ -113,6 +131,7 @@ MIN_RESPONSES_FOR_PLANS = 2
 def generate_round(session: Session, trip: models.Trip) -> int:
     """Roda o motor com a resposta mais recente de cada um e grava a rodada. Devolve o número dela."""
     session.refresh(trip, with_for_update=True)
+    ensure_open(trip)
     respondents = queries.respondents(session, trip.id)
     if len(respondents) < MIN_RESPONSES_FOR_PLANS:
         raise HTTPException(422, "São necessárias pelo menos 2 respostas para gerar planos.")
@@ -158,3 +177,78 @@ def generate_round(session: Session, trip: models.Trip) -> int:
     trip.status = "planned" if result.plans else "collecting"
     session.flush()
     return round_number
+
+
+def rejection_draft(
+    session: Session, member: models.Member, comment: str, parser: ConstraintParser
+) -> schemas.ConstraintDraft:
+    """O que o motivo da recusa pede, interpretado como na tela Responder. Não salva nada."""
+    trip = session.get_one(models.Trip, member.trip_id)
+    parsed = parser.parse(comment, convert.parse_context(trip, queries.trip_destinations(session, trip.id)))
+    return schemas.ConstraintDraft(
+        hard=parsed.hard,
+        soft=parsed.soft,
+        member_limits=queries.own_limits(session, trip, member.id, convert.items_json(parsed.hard)),
+    )
+
+
+def confirm_rejection(
+    session: Session, member: models.Member, plan: models.Plan, data: schemas.ConfirmRejectionInput
+) -> models.ConstraintSet:
+    """
+    Grava a nova versão das restrições de quem recusou: as anteriores revistas
+    pelo que a pessoa confirmou (engine/rounds.py). Vale a partir da próxima rodada.
+    """
+    reaction = queries.reactions_by_member(session, plan.id).get(member.id)
+    if reaction is None or reaction.verdict != "rejected":
+        raise HTTPException(409, "Só quem recusou este plano confirma uma restrição a partir do motivo.")
+    previous = queries.latest_constraints(session, member.id)
+    if previous and previous.confirmed_at >= reaction.reacted_at:
+        raise HTTPException(409, "A restrição desta recusa já foi confirmada.")
+
+    destinations = queries.trip_destinations(session, member.trip_id)
+    _check_destinations(destinations, [*data.hard, *data.soft])
+    version = (previous.version if previous else 0) + 1
+    # Os ids do rascunho ganham a versão: nunca repetem os das restrições anteriores.
+    added = convert.with_summaries(
+        schemas.ConstraintsInput(
+            raw_text=reaction.comment or "",
+            hard=[item.model_copy(update={"id": f"v{version}-{item.id}"}) for item in data.hard],
+            soft=[item.model_copy(update={"id": f"v{version}-{item.id}"}) for item in data.soft],
+        ),
+        destinations,
+    )
+    previous_hard = previous.hard if previous else []
+    previous_soft = previous.soft if previous else []
+    added_hard, added_soft = convert.items_json(added.hard), convert.items_json(added.soft)
+
+    revised = revise(
+        convert.engine_member(member.id, previous_hard, previous_soft, member.position),
+        convert.engine_member(member.id, added_hard, added_soft, member.position),
+    )
+    by_id = {item["id"]: item for item in [*previous_hard, *previous_soft, *added_hard, *added_soft]}
+    raw_text = f"Ao recusar um plano: {reaction.comment}"
+    record = models.ConstraintSet(
+        member_id=member.id,
+        raw_text=f"{previous.raw_text}\n\n{raw_text}" if previous and previous.raw_text else raw_text,
+        hard=[by_id[item.id] for item in revised.hard],
+        soft=[by_id[item.id] for item in revised.soft],
+        version=version,
+    )
+    session.add(record)
+    session.flush()
+    session.refresh(record)
+    member.responded_at = record.confirmed_at
+    return record
+
+
+def update_agreement(session: Session, trip: models.Trip, plan: models.Plan) -> None:
+    """Fecha a viagem quando todos que responderam aceitaram o recomendado da rodada mais recente."""
+    if plan.position != 0:
+        return
+    verdicts = {
+        member_id: row.verdict for member_id, row in queries.reactions_by_member(session, plan.id).items()
+    }
+    respondent_ids = [member.id for member, _ in queries.respondents(session, trip.id)]
+    if is_agreed(respondent_ids, verdicts):
+        trip.status = "agreed"

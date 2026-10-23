@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app import convert, models, schemas
 from engine import models as engine
+from engine.privacy import limits_for_member
 
 # Leituras usadas por mais de uma rota.
 
@@ -107,3 +108,20 @@ def plan_round(
         recommended_plan_id=plans[0].id if plans else None,
         reactions=[schemas.Reaction.model_validate(reaction) for reaction in reactions],
     )
+
+
+def own_limits(
+    session: Session, trip: models.Trip, member_id: str, hard: list[dict]
+) -> list[schemas.MemberLimit]:
+    """O que cada limite desta pessoa elimina sozinho. Só para ela (engine/privacy.py)."""
+    destinations = trip_destinations(session, trip.id)
+    member = convert.engine_member(member_id, hard, [])
+    return [
+        convert.member_limit(item)
+        for item in limits_for_member(convert.trip_input(trip, destinations, [member]), member_id)
+    ]
+
+
+def reactions_by_member(session: Session, plan_id: str) -> dict[str, models.Reaction]:
+    rows = session.scalars(select(models.Reaction).where(models.Reaction.plan_id == plan_id))
+    return {row.member_id: row for row in rows}

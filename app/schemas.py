@@ -360,3 +360,40 @@ class CreateReactionInput(Input):
     invite_token: str = Field(min_length=1, max_length=200)
     verdict: Verdict
     comment: str | None = Field(default=None, max_length=1000)
+
+
+class ConstraintDraft(Schema):
+    """
+    O que o motivo da recusa pede, interpretado e ainda não salvo. Só para quem
+    recusou: confirma (com ou sem mudanças) em POST /plans/{id}/reactions/constraints.
+    """
+
+    hard: list[HardConstraint]
+    soft: list[SoftConstraint]
+    member_limits: list[MemberLimit]
+
+
+class ReactionResult(Reaction):
+    """Resposta de POST /plans/{id}/reactions."""
+
+    #: Só na recusa. Listas vazias quando o motivo não traz nenhum limite ou preferência reconhecível.
+    constraint_draft: ConstraintDraft | None = None
+    #: Status da viagem depois da reação: "agreed" quando esta reação fechou a viagem.
+    trip_status: TripStatus
+
+
+class ConfirmRejectionInput(Input):
+    """Corpo de POST /plans/{id}/reactions/constraints: o rascunho que a pessoa confirmou."""
+
+    invite_token: str = Field(min_length=1, max_length=200)
+    hard: list[HardConstraint] = Field(max_length=20)
+    soft: list[SoftConstraint] = Field(max_length=20)
+
+    @model_validator(mode="after")
+    def _check(self) -> "ConfirmRejectionInput":
+        ids = [item.id for item in [*self.hard, *self.soft]]
+        if len(set(ids)) != len(ids):
+            raise ValueError("Cada restrição precisa de um id diferente.")
+        if not ids:
+            raise ValueError("Confirme pelo menos um limite ou uma preferência.")
+        return self

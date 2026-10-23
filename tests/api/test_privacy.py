@@ -114,7 +114,25 @@ def walk_every_route(recorder: Recorder, trip: TripHandle, client) -> None:
             json={"raw_text": "Quero praia e ritmo tranquilo, de 10 a 20 de julho."},
         )
     for plan in created["plans"][:1]:
-        for name in names:
+        # Quem organiza recusa e confirma o motivo. A recusa também evita que a viagem feche no meio.
+        rejecter, *accepting = names
+        rejection = {
+            "invite_token": trip.tokens[rejecter],
+            "verdict": "rejected",
+            "comment": "Prefiro Paraty.",
+        }
+        draft = recorder.call(rejecter, "post", f"/plans/{plan['id']}/reactions", json=rejection)
+        recorder.call(
+            rejecter,
+            "post",
+            f"/plans/{plan['id']}/reactions/constraints",
+            json={
+                "invite_token": trip.tokens[rejecter],
+                "hard": draft["constraint_draft"]["hard"],
+                "soft": draft["constraint_draft"]["soft"],
+            },
+        )
+        for name in accepting:
             verdict = {"invite_token": trip.tokens[name], "verdict": "accepted"}
             recorder.call(name, "post", f"/plans/{plan['id']}/reactions", json=verdict)
         recorder.call(

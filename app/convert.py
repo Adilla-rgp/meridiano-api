@@ -1,6 +1,7 @@
 from datetime import date
 
 from app import models, schemas
+from app.parsing import ParseContext
 from engine import models as engine
 from engine.summaries import hard_summary, soft_summary
 
@@ -82,6 +83,15 @@ def trip_input(
         alpha=trip.alpha,
         destinations=tuple(engine_destination(row) for row in destinations),
         members=tuple(members),
+    )
+
+
+def parse_context(trip: models.Trip, destinations: list[models.CatalogDestination]) -> ParseContext:
+    return ParseContext(
+        window_start=trip.date_window_start,
+        window_end=trip.date_window_end,
+        nights=trip.nights,
+        destinations=tuple(engine_destination(row) for row in destinations),
     )
 
 
