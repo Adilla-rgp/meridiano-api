@@ -63,9 +63,12 @@ def engine_soft(item: dict) -> engine.SoftConstraint:
     raise ValueError(f"Preferência desconhecida: {item['kind']}")
 
 
-def engine_member(member_id: str, hard: list[dict], soft: list[dict]) -> engine.Member:
+def engine_member(member_id: str, hard: list[dict], soft: list[dict], position: int = 0) -> engine.Member:
     return engine.Member(
-        member_id, tuple(engine_hard(item) for item in hard), tuple(engine_soft(item) for item in soft)
+        member_id,
+        tuple(engine_hard(item) for item in hard),
+        tuple(engine_soft(item) for item in soft),
+        position,
     )
 
 

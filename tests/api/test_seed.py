@@ -25,8 +25,8 @@ def test_seed_catalog_is_idempotent(db):
 
 def test_demo_responses_match_the_engine_fixtures():
     members = {
-        name: convert.engine_member(f"mem-{name.lower()}", body["hard"], body["soft"])
-        for name, body in RESPONSES.items()
+        name: convert.engine_member(f"mem-{name.lower()}", body["hard"], body["soft"], position)
+        for position, (name, body) in enumerate(RESPONSES.items())
     }
     assert members == {"Ana": ANA, "Bruno": BRUNO, "Carla": CARLA}
 

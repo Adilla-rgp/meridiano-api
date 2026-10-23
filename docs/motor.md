@@ -56,7 +56,7 @@ Quando nenhum candidato respeita todos os limites, a rodada devolve:
 
 - `plans: []`;
 - `excluded_destinations`, com todos os destinos e motivo `limit`;
-- `blocking_limits`: cada limite que elimina algum candidato, com `kind`, `member_id` (nulo no orçamento) e `eliminated_candidates`, do que mais elimina para o que menos. No empate, vale a ordem de participante e de limite.
+- `blocking_limits`: cada limite que elimina algum candidato, com `kind`, `member_id` (nulo no orçamento) e `eliminated_candidates`, do que mais elimina para o que menos. No empate, vale a ordem do convite (`position` do participante; quem organiza primeiro) e a do limite. O id só desempata quem tem a mesma posição.
 
 Exemplo: com 6 noites fixadas, quem só pode viajar 3 noites elimina todos os candidatos, inclusive o roteiro curto, de 4 noites. Esse limite aparece em primeiro, com `eliminated_candidates` igual a `alternatives_evaluated`. A tela pode sugerir reduzir as noites da viagem.
 

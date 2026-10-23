@@ -75,7 +75,8 @@ def respondents(session: Session, trip_id: str) -> list[tuple[models.Member, eng
     for member in trip_members(session, trip_id):
         record = latest_constraints(session, member.id)
         if member.responded_at and record:
-            result.append((member, convert.engine_member(member.id, record.hard, record.soft)))
+            engine_member = convert.engine_member(member.id, record.hard, record.soft, member.position)
+            result.append((member, engine_member))
     return result
 
 
