@@ -73,6 +73,13 @@ O valor do orçamento é confidencial, e quem tem limite de orçamento também n
 
 Limitação: num grupo em que só uma pessoa declarou orçamento, quem souber disso por fora sabe de quem é o "budget". As satisfações dessa pessoa também variam com a folga, o que permite inferir algo comparando planos de custos diferentes.
 
+## Entre rodadas
+
+Regras em `engine/rounds.py`:
+
+- **Recusa confirmada:** as restrições de quem recusou são revistas pelo que a pessoa confirmou do motivo. Limites novos se somam aos anteriores (valem todos). Uma preferência nova substitui a anterior do mesmo tipo, porque é a opinião mais recente; as de outros tipos ficam.
+- **Acordo:** a viagem fecha quando todos que responderam aceitaram o plano recomendado da rodada mais recente (aceito ou aceito com ressalva) e ninguém o recusou. Aceitar outra alternativa não conta.
+
 ## Limitações conhecidas
 
 - **Duração:** só existem duas durações, as noites fixadas e o roteiro curto com 2 a menos. O motor não testa roteiros mais longos nem durações intermediárias, e ninguém informa a duração que prefere.

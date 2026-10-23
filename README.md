@@ -87,8 +87,19 @@ Sem login por e-mail por enquanto (`POST /auth/magic-link` não existe).
 | POST | /invite/{token}/constraints/parse | convidado |
 | PUT | /invite/{token}/constraints | convidado |
 | POST | /plans/{id}/reactions | convidado |
+| POST | /plans/{id}/reactions/constraints | convidado que recusou |
 
 Os formatos seguem `planner-vite/src/types/api.ts`. Erros de regra vêm como `{"detail": "mensagem em português"}`; erros de formato, no padrão do FastAPI (`detail` com a lista de campos).
+
+## Rodadas, recusas e acordo
+
+- **Reagir:** só ao plano da rodada mais recente; um plano de rodada anterior responde 409.
+- **Recusa vira restrição:** a resposta de uma recusa traz `constraint_draft`, o motivo interpretado pelo `ConstraintParser` (limites, preferências e o que cada limite elimina, só para quem recusou). Nada é salvo até a pessoa confirmar em `POST /plans/{id}/reactions/constraints`, com `invite_token`, `hard` e `soft` (pode tirar itens do rascunho). A confirmação grava uma nova versão das restrições (`version` + 1), que entra na próxima rodada: limites novos se somam aos anteriores e uma preferência nova substitui a do mesmo tipo (`engine/rounds.py`). Cada recusa é confirmada uma vez.
+- **Acordo:** a viagem passa a `agreed` quando todos que responderam aceitaram o plano recomendado da rodada mais recente (aceito ou aceito com ressalva) e ninguém o recusou. A resposta da reação traz `trip_status`. Depois disso, respostas, reações e novas rodadas respondem 409.
+
+## Limite de requisições
+
+A interpretação do texto livre (`/invite/{token}/constraints/parse` e o motivo de uma recusa) e a geração de planos têm um limite por token, numa janela de 60 segundos: `PARSE_RATE_LIMIT` (padrão 20, por convite) e `PLANS_RATE_LIMIT` (padrão 10, por token de administração). Passou do limite, a API responde 429 com `Retry-After`. O contador fica na memória do processo; com mais de um processo, troque por um compartilhado.
 
 ## Interpretação do texto livre
 
