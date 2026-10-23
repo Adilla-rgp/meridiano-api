@@ -18,6 +18,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_origins=settings.cors_origin_list,
         allow_methods=["GET", "POST", "PUT"],
         allow_headers=["Content-Type", "X-Admin-Token", "X-Invite-Token"],
+        expose_headers=["Retry-After"],
     )
     for module in (destinations, trips, invites, plans):
         app.include_router(module.router)

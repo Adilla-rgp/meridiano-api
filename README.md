@@ -43,6 +43,8 @@ docker compose up -d db                            # só o banco
 
 A configuração vem de variáveis de ambiente ou do `.env` (veja `.env.example`): `DATABASE_URL`, `FRONT_BASE_URL`, `CORS_ORIGINS` e `CONSTRAINT_PARSER`.
 
+`CORS_ORIGINS` lista, separadas por vírgula, as origens do front que podem chamar a API: a local (`http://localhost:5173`) e a de produção. No docker compose, defina antes de subir: `CORS_ORIGINS=http://localhost:5173,https://seu-front.vercel.app docker compose up`.
+
 ### Testes e verificação
 
 ```sh
