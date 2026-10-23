@@ -91,3 +91,14 @@ Limitação: num grupo em que só uma pessoa declarou orçamento, quem souber di
 | `after_diego_response` | mais Diego, só 3 noites | rodada sem plano viável |
 
 Cada rodada traz as restrições de quem respondeu. O mock do front usa a rodada cujas restrições batem com as respostas salvas. O arquivo também traz o catálogo e os limites de cada pessoa (`member_limits`). Os mocks do front leem uma cópia dele, e um teste falha se o arquivo gravado ficar diferente da saída atual do motor.
+
+## Mapa de tensões
+
+`engine/tensions.py` calcula o mapa de tensões só com quem já respondeu. Antes ficava nos mocks do front.
+
+- **Pares:** conflito por datas (dois limites de data com menos de 4 dias em comum), clima (o limite de clima de um elimina um destino que o outro prefere) ou ritmo (um prefere tranquilo e outro agitado, ambos com peso de pelo menos 0,8). Vale o primeiro critério nessa ordem. Orçamento nunca é critério de aresta.
+- **Um limite elimina um destino** quando nenhum candidato do destino o respeita: o orçamento é comparado com o roteiro mais barato, e um limite de datas que não comporta nem o roteiro curto elimina todos.
+- **Principais restrições:** o que cada orçamento elimina, sem nome ("O orçamento de um participante elimina Paraty."); o que cada limite de clima e cada veto elimina, com o nome e com quem prefere o destino eliminado; e a janela comum de datas.
+- **Quem tem mais limites:** pelo menos 2 limites e estritamente mais que todos os outros. Orçamento não entra na contagem, para o destaque não revelar quem tem esse limite.
+
+`engine/summaries.py` gera o resumo de cada restrição ("Até R$ 1.100 por pessoa, tudo incluso", "Jericoacoara, depois Paraty"). O de orçamento traz o valor, então só a própria pessoa o vê.
