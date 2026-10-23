@@ -16,6 +16,10 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173"
     #: Interpretação do texto livre: "rules" (por regras). O LLM entra como outra implementação.
     constraint_parser: str = "rules"
+    #: Por minuto e por convite, na interpretação do texto livre (parse e motivo da recusa). 0 desliga.
+    parse_rate_limit: int = 20
+    #: Requisições por minuto, por token de administração, na geração de planos. 0 desliga.
+    plans_rate_limit: int = 10
 
     @property
     def cors_origin_list(self) -> list[str]:

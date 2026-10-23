@@ -67,3 +67,17 @@ def parser(request: Request) -> ConstraintParser:
 
 
 ParserDep = Annotated[ConstraintParser, Depends(parser)]
+
+
+def limit_parse(token: str, request: Request, _member: InviteMember) -> None:
+    """Limite por convite na interpretação do texto livre (app/ratelimit.py)."""
+    request.app.state.parse_limiter.check(token)
+
+
+def limit_plans(
+    request: Request,
+    _trip: AdminTrip,
+    admin_token: Annotated[str | None, Header(alias=ADMIN_HEADER)] = None,
+) -> None:
+    """Limite por token de administração na geração de planos."""
+    request.app.state.plans_limiter.check(admin_token or "")

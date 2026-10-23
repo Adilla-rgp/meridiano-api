@@ -1,9 +1,17 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Header, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 
 from app import convert, models, queries, schemas, services
-from app.deps import ADMIN_HEADER, INVITE_HEADER, AdminTrip, SessionDep, find_member_by_token, find_trip
+from app.deps import (
+    ADMIN_HEADER,
+    INVITE_HEADER,
+    AdminTrip,
+    SessionDep,
+    find_member_by_token,
+    find_trip,
+    limit_plans,
+)
 from app.security import token_matches
 from engine.tensions import tensions
 
@@ -69,7 +77,12 @@ def get_tensions(trip: AdminTrip, session: SessionDep):
     )
 
 
-@router.post("/trips/{trip_id}/plans", response_model=schemas.PlanRound, status_code=201)
+@router.post(
+    "/trips/{trip_id}/plans",
+    response_model=schemas.PlanRound,
+    status_code=201,
+    dependencies=[Depends(limit_plans)],
+)
 def generate_plans(trip: AdminTrip, session: SessionDep):
     """Roda o motor de forma síncrona e grava a nova rodada."""
     round_number = services.generate_round(session, trip)
