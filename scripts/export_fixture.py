@@ -9,18 +9,21 @@ Cenários, na ordem em que a demonstração chega a eles:
 - eva_limits_only: Eva remove a preferência de ritmo e fica só com limites;
 - after_diego_response: mais Diego, que só pode viajar 3 noites (nada é viável).
 
-    python -m scripts.export_fixture                       # fixtures/july-trip.json
+    python -m scripts.export_fixture                       # fixtures/july-trip.json e july-tensions.json
     python -m scripts.export_fixture --out ../planner-vite/src/mocks/fixtures/july-trip.json
 
 Cada rodada traz as restrições de quem respondeu, para o mock escolher a rodada
 que corresponde às respostas salvas, e os planos sem id, trip_id e round, que o
 front (ou a API) atribui ao criar a rodada. O catálogo também vai, para o front
 conferir que os mocks dele são os mesmos.
+
+Ao lado, july-tensions.json traz o mapa de tensões de cada cenário, calculado
+por engine/tensions.py, no formato de GET /trips/{id}/tensions.
 """
 
 import argparse
 import json
-from dataclasses import replace
+from dataclasses import asdict, replace
 from datetime import date
 from pathlib import Path
 
@@ -46,10 +49,14 @@ from engine.models import (
     TripInput,
 )
 from engine.privacy import limits_for_member
+from engine.tensions import tensions
 from tests.fixtures import DIEGO, EVA, JULY_TRIP
 
 TRIP_ID = "trip-julho"
 DEFAULT_OUT = Path("fixtures/july-trip.json")
+TENSIONS_FILE = "july-tensions.json"
+#: Nomes de quem responde, para os resumos das principais restrições.
+NAMES = {"mem-ana": "Ana", "mem-bruno": "Bruno", "mem-carla": "Carla", "mem-eva": "Eva", "mem-diego": "Diego"}
 #: Limites violados por plano devolvido: o motor só devolve planos com zero.
 VIOLATED_LIMITS = 0
 
@@ -184,6 +191,27 @@ def scenarios() -> dict[str, TripInput]:
     }
 
 
+def _tensions(trip: TripInput) -> dict:
+    """Como GET /trips/{id}/tensions: trip.members são os que responderam, na ordem do convite."""
+    result = tensions(trip, NAMES)
+    return {
+        "trip_id": TRIP_ID,
+        "member_count": len(NAMES),
+        "responded_count": len(trip.members),
+        "most_restrictive_member_id": result.most_restrictive_member_id,
+        "pairs": [asdict(item) for item in result.pairs],
+        "key_constraints": [asdict(item) for item in result.key_constraints],
+        "viability": [asdict(item) for item in result.viability],
+    }
+
+
+def build_tensions() -> dict:
+    return {
+        "generated_by": "planner-api scripts/export_fixture.py (engine/tensions.py)",
+        "rounds": {name: _tensions(trip) for name, trip in scenarios().items()},
+    }
+
+
 def build() -> dict:
     everyone = replace(JULY_TRIP, members=(*JULY_TRIP.members, DIEGO))
     return {
@@ -220,8 +248,10 @@ def main() -> None:
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     args = parser.parse_args()
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(build(), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"Gravado em {args.out}")
+    tensions_out = args.out.with_name(TENSIONS_FILE)
+    for path, data in ((args.out, build()), (tensions_out, build_tensions())):
+        path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        print(f"Gravado em {path}")
 
 
 if __name__ == "__main__":

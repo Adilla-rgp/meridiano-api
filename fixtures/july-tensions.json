@@ -1,0 +1,311 @@
+{
+  "generated_by": "planner-api scripts/export_fixture.py (engine/tensions.py)",
+  "rounds": {
+    "before_eva_response": {
+      "trip_id": "trip-julho",
+      "member_count": 5,
+      "responded_count": 3,
+      "most_restrictive_member_id": null,
+      "pairs": [
+        {
+          "member_a_id": "mem-ana",
+          "member_b_id": "mem-bruno",
+          "status": "compatible",
+          "criterion": null
+        },
+        {
+          "member_a_id": "mem-ana",
+          "member_b_id": "mem-carla",
+          "status": "compatible",
+          "criterion": null
+        },
+        {
+          "member_a_id": "mem-bruno",
+          "member_b_id": "mem-carla",
+          "status": "compatible",
+          "criterion": null
+        }
+      ],
+      "key_constraints": [
+        {
+          "id": "common-dates",
+          "summary": "A janela comum de datas é de 8 a 18 de julho."
+        }
+      ],
+      "viability": [
+        {
+          "destination_id": "dest-chapada",
+          "accepted_count": 3,
+          "responded_count": 3
+        },
+        {
+          "destination_id": "dest-jericoacoara",
+          "accepted_count": 3,
+          "responded_count": 3
+        },
+        {
+          "destination_id": "dest-lencois",
+          "accepted_count": 3,
+          "responded_count": 3
+        },
+        {
+          "destination_id": "dest-paraty",
+          "accepted_count": 3,
+          "responded_count": 3
+        }
+      ]
+    },
+    "after_eva_response": {
+      "trip_id": "trip-julho",
+      "member_count": 5,
+      "responded_count": 4,
+      "most_restrictive_member_id": "mem-eva",
+      "pairs": [
+        {
+          "member_a_id": "mem-ana",
+          "member_b_id": "mem-bruno",
+          "status": "compatible",
+          "criterion": null
+        },
+        {
+          "member_a_id": "mem-ana",
+          "member_b_id": "mem-carla",
+          "status": "compatible",
+          "criterion": null
+        },
+        {
+          "member_a_id": "mem-ana",
+          "member_b_id": "mem-eva",
+          "status": "compatible",
+          "criterion": null
+        },
+        {
+          "member_a_id": "mem-bruno",
+          "member_b_id": "mem-carla",
+          "status": "compatible",
+          "criterion": null
+        },
+        {
+          "member_a_id": "mem-bruno",
+          "member_b_id": "mem-eva",
+          "status": "compatible",
+          "criterion": null
+        },
+        {
+          "member_a_id": "mem-carla",
+          "member_b_id": "mem-eva",
+          "status": "conflict",
+          "criterion": "climate"
+        }
+      ],
+      "key_constraints": [
+        {
+          "id": "mem-eva:eva-h3",
+          "summary": "O limite de clima de Eva elimina Chapada Diamantina, que Carla prefere."
+        },
+        {
+          "id": "common-dates",
+          "summary": "A janela comum de datas é de 10 a 18 de julho."
+        }
+      ],
+      "viability": [
+        {
+          "destination_id": "dest-chapada",
+          "accepted_count": 3,
+          "responded_count": 4
+        },
+        {
+          "destination_id": "dest-jericoacoara",
+          "accepted_count": 4,
+          "responded_count": 4
+        },
+        {
+          "destination_id": "dest-lencois",
+          "accepted_count": 4,
+          "responded_count": 4
+        },
+        {
+          "destination_id": "dest-paraty",
+          "accepted_count": 4,
+          "responded_count": 4
+        }
+      ]
+    },
+    "eva_limits_only": {
+      "trip_id": "trip-julho",
+      "member_count": 5,
+      "responded_count": 4,
+      "most_restrictive_member_id": "mem-eva",
+      "pairs": [
+        {
+          "member_a_id": "mem-ana",
+          "member_b_id": "mem-bruno",
+          "status": "compatible",
+          "criterion": null
+        },
+        {
+          "member_a_id": "mem-ana",
+          "member_b_id": "mem-carla",
+          "status": "compatible",
+          "criterion": null
+        },
+        {
+          "member_a_id": "mem-ana",
+          "member_b_id": "mem-eva",
+          "status": "compatible",
+          "criterion": null
+        },
+        {
+          "member_a_id": "mem-bruno",
+          "member_b_id": "mem-carla",
+          "status": "compatible",
+          "criterion": null
+        },
+        {
+          "member_a_id": "mem-bruno",
+          "member_b_id": "mem-eva",
+          "status": "compatible",
+          "criterion": null
+        },
+        {
+          "member_a_id": "mem-carla",
+          "member_b_id": "mem-eva",
+          "status": "conflict",
+          "criterion": "climate"
+        }
+      ],
+      "key_constraints": [
+        {
+          "id": "mem-eva:eva-h3",
+          "summary": "O limite de clima de Eva elimina Chapada Diamantina, que Carla prefere."
+        },
+        {
+          "id": "common-dates",
+          "summary": "A janela comum de datas é de 10 a 18 de julho."
+        }
+      ],
+      "viability": [
+        {
+          "destination_id": "dest-chapada",
+          "accepted_count": 3,
+          "responded_count": 4
+        },
+        {
+          "destination_id": "dest-jericoacoara",
+          "accepted_count": 4,
+          "responded_count": 4
+        },
+        {
+          "destination_id": "dest-lencois",
+          "accepted_count": 4,
+          "responded_count": 4
+        },
+        {
+          "destination_id": "dest-paraty",
+          "accepted_count": 4,
+          "responded_count": 4
+        }
+      ]
+    },
+    "after_diego_response": {
+      "trip_id": "trip-julho",
+      "member_count": 5,
+      "responded_count": 5,
+      "most_restrictive_member_id": "mem-eva",
+      "pairs": [
+        {
+          "member_a_id": "mem-ana",
+          "member_b_id": "mem-bruno",
+          "status": "compatible",
+          "criterion": null
+        },
+        {
+          "member_a_id": "mem-ana",
+          "member_b_id": "mem-carla",
+          "status": "compatible",
+          "criterion": null
+        },
+        {
+          "member_a_id": "mem-ana",
+          "member_b_id": "mem-eva",
+          "status": "compatible",
+          "criterion": null
+        },
+        {
+          "member_a_id": "mem-ana",
+          "member_b_id": "mem-diego",
+          "status": "compatible",
+          "criterion": null
+        },
+        {
+          "member_a_id": "mem-bruno",
+          "member_b_id": "mem-carla",
+          "status": "compatible",
+          "criterion": null
+        },
+        {
+          "member_a_id": "mem-bruno",
+          "member_b_id": "mem-eva",
+          "status": "compatible",
+          "criterion": null
+        },
+        {
+          "member_a_id": "mem-bruno",
+          "member_b_id": "mem-diego",
+          "status": "compatible",
+          "criterion": null
+        },
+        {
+          "member_a_id": "mem-carla",
+          "member_b_id": "mem-eva",
+          "status": "conflict",
+          "criterion": "climate"
+        },
+        {
+          "member_a_id": "mem-carla",
+          "member_b_id": "mem-diego",
+          "status": "compatible",
+          "criterion": null
+        },
+        {
+          "member_a_id": "mem-eva",
+          "member_b_id": "mem-diego",
+          "status": "compatible",
+          "criterion": null
+        }
+      ],
+      "key_constraints": [
+        {
+          "id": "mem-eva:eva-h3",
+          "summary": "O limite de clima de Eva elimina Chapada Diamantina, que Carla prefere."
+        },
+        {
+          "id": "common-dates",
+          "summary": "A janela comum de datas é de 12 a 15 de julho."
+        }
+      ],
+      "viability": [
+        {
+          "destination_id": "dest-chapada",
+          "accepted_count": 3,
+          "responded_count": 5
+        },
+        {
+          "destination_id": "dest-jericoacoara",
+          "accepted_count": 4,
+          "responded_count": 5
+        },
+        {
+          "destination_id": "dest-lencois",
+          "accepted_count": 4,
+          "responded_count": 5
+        },
+        {
+          "destination_id": "dest-paraty",
+          "accepted_count": 4,
+          "responded_count": 5
+        }
+      ]
+    }
+  }
+}
