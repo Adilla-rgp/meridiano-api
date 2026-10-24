@@ -9,7 +9,7 @@ A especificação do produto fica no repositório do front (`planner-vite/docs/e
 - **Duração:** o organizador fixa as noites da viagem (`nights`, padrão 6). Para cada destino, o motor testa o roteiro padrão e um "roteiro curto" com 2 noites a menos (no mínimo 2). O dia da volta é o dia da ida mais as noites.
 - **Custo:** `fixed_cost + noites × nightly_cost`, por pessoa.
 - **Candidato:** destino × variante × dia de ida dentro da janela. `alternatives_evaluated` é quantos foram gerados.
-- **Filtro:** um candidato que fere qualquer limite (datas, orçamento, clima vetado, destino vetado) é descartado. O limite de orçamento é comparado com o custo total.
+- **Filtro:** um candidato que fere qualquer limite (datas, orçamento, clima vetado, destino vetado, tag vetada) é descartado. O limite de tags (`exclude_tags`, "não quero praia") elimina todo destino que tenha pelo menos uma das tags. O limite de orçamento é comparado com o custo total.
 
 ## Satisfação
 
@@ -103,9 +103,9 @@ Cada rodada traz as restrições de quem respondeu. O mock do front usa a rodada
 
 `engine/tensions.py` calcula o mapa de tensões só com quem já respondeu. Antes ficava nos mocks do front.
 
-- **Pares:** conflito por datas (dois limites de data com menos de 4 dias em comum), clima (o limite de clima de um elimina um destino que o outro prefere) ou ritmo (um prefere tranquilo e outro agitado, ambos com peso de pelo menos 0,8). Vale o primeiro critério nessa ordem. Orçamento nunca é critério de aresta.
+- **Pares:** conflito por datas (dois limites de data com menos de 4 dias em comum), clima (o limite de clima de um elimina um destino que o outro prefere) ou ritmo (um prefere tranquilo e outro agitado, ambos com peso de pelo menos 0,8). Vale o primeiro critério nessa ordem. Orçamento nunca é critério de aresta. O limite de tags ainda não gera aresta, porque o contrato não tem esse critério; ele aparece nas principais restrições e na viabilidade.
 - **Um limite elimina um destino** quando nenhum candidato do destino o respeita: o orçamento é comparado com o roteiro mais barato, e um limite de datas que não comporta nem o roteiro curto elimina todos.
-- **Principais restrições:** o que cada orçamento elimina, sem nome ("O orçamento de um participante elimina Paraty."); o que cada limite de clima e cada veto elimina, com o nome e com quem prefere o destino eliminado; e a janela comum de datas.
+- **Principais restrições:** o que cada orçamento elimina, sem nome ("O orçamento de um participante elimina Paraty."); o que cada limite de clima, de tags e cada veto elimina, com o nome e com quem prefere o destino eliminado; e a janela comum de datas.
 - **Quem tem mais limites:** pelo menos 2 limites e estritamente mais que todos os outros. Orçamento não entra na contagem, para o destaque não revelar quem tem esse limite.
 
 `engine/summaries.py` gera o resumo de cada restrição ("Até R$ 1.100 por pessoa, tudo incluso", "Jericoacoara, depois Paraty"). O de orçamento traz o valor, então só a própria pessoa o vê.

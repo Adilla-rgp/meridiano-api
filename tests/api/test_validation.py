@@ -86,6 +86,14 @@ def test_missing_summaries_come_from_the_engine(client, july):
     assert saved["soft"][0]["summary"] == "Chapada Diamantina, depois Lençóis Maranhenses"
 
 
+def test_saves_a_tag_limit(client, july):
+    body = {"raw_text": "não quero praia", "hard": [{"id": "h1", "kind": "exclude_tags", "tags": ["praia"]}]}
+    saved = client.put(f"/invite/{july.tokens['Eva']}/constraints", json=body | {"soft": []}).json()
+    assert saved["hard"] == [
+        {"id": "h1", "summary": "Nada de praia", "kind": "exclude_tags", "tags": ["praia"]}
+    ]
+
+
 def test_parse_needs_some_text(client):
     trip = create_july_trip(client)
     response = client.post(f"/invite/{trip.tokens['Eva']}/constraints/parse", json={"raw_text": "oi"})

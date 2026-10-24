@@ -48,6 +48,8 @@ def engine_hard(item: dict) -> engine.HardConstraint:
             return engine.ExcludeClimate(item["id"], frozenset(item["climates"]))
         case "exclude_destination":
             return engine.ExcludeDestination(item["id"], frozenset(item["destination_ids"]))
+        case "exclude_tags":
+            return engine.ExcludeTags(item["id"], frozenset(item["tags"]))
     raise ValueError(f"Limite desconhecido: {item['kind']}")
 
 

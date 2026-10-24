@@ -1,6 +1,6 @@
 from dataclasses import replace
 
-from engine.models import Budget, ExcludeClimate
+from engine.models import Budget, ExcludeClimate, ExcludeTags
 from engine.tensions import KeyConstraint, MemberPair, tensions
 from tests.fixtures import ANA, BRUNO, CARLA, DIEGO, EVA, trip_with
 
@@ -50,6 +50,16 @@ def test_keeps_the_name_on_limits_other_than_budget():
         item.summary for item in result.key_constraints
     ]
     assert MemberPair("mem-carla", "mem-eva", "conflict", "climate") in result.pairs
+
+
+def test_tag_limit_is_named_like_other_limits():
+    bruno = replace(BRUNO, hard=(*BRUNO.hard, ExcludeTags("bruno-h2", frozenset({"vida noturna"}))))
+    result = tensions(trip_with(members=(ANA, bruno, CARLA, EVA)), NAMES)
+    assert "O limite de tipo de destino de Bruno elimina Jericoacoara." in [
+        item.summary for item in result.key_constraints
+    ]
+    jeri = next(item for item in result.viability if item.destination_id == "dest-jericoacoara")
+    assert jeri.accepted_count == 3
 
 
 def test_date_limit_shorter_than_the_short_variant_eliminates_every_destination():

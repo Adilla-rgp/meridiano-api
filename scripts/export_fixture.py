@@ -33,6 +33,7 @@ from engine.models import (
     ExcludeClimate,
     ExcludedDestination,
     ExcludeDestination,
+    ExcludeTags,
     HardConstraint,
     Member,
     MemberLimit,
@@ -76,6 +77,8 @@ def _hard(item: HardConstraint) -> dict:
                 "kind": "exclude_destination",
                 "destination_ids": sorted(item.destination_ids),
             }
+        case ExcludeTags():
+            return {"id": item.id, "kind": "exclude_tags", "tags": sorted(item.tags)}
 
 
 def _soft(item: SoftConstraint) -> dict:

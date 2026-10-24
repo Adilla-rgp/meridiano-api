@@ -8,6 +8,7 @@ from engine.models import (
     Destination,
     ExcludeClimate,
     ExcludeDestination,
+    ExcludeTags,
     HardConstraint,
     LimitKind,
     Member,
@@ -66,6 +67,8 @@ def violates(candidate: Candidate, constraint: HardConstraint) -> bool:
             return candidate.destination.climate in climates
         case ExcludeDestination(destination_ids=ids):
             return candidate.destination.id in ids
+        case ExcludeTags(tags=tags):
+            return bool(tags & set(candidate.destination.tags))
 
 
 def limit_kind(constraint: HardConstraint) -> LimitKind:
@@ -78,6 +81,8 @@ def limit_kind(constraint: HardConstraint) -> LimitKind:
             return "exclude_climate"
         case ExcludeDestination():
             return "exclude_destination"
+        case ExcludeTags():
+            return "exclude_tags"
 
 
 def violations(candidate: Candidate, members: tuple[Member, ...]) -> list[tuple[str, str]]:
