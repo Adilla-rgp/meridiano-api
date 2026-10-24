@@ -25,6 +25,7 @@ from pathlib import Path
 from app.parsing import ConstraintParser, ParseContext, get_parser
 from app.seed.catalog import CATALOG
 from app.seed.july_trip import TRIP
+from app.settings import get_settings
 from engine.models import Destination
 
 FIELDS = ("destinations", "dates", "budget", "climate", "pace", "tags")
@@ -235,7 +236,9 @@ def main(argv: list[str] | None = None) -> None:
     sys.stdout.reconfigure(encoding="utf-8")
 
     started = time.perf_counter()
-    results = evaluate(get_parser(options.parser), load_cases(options.cases), july_context())
+    # Sem retorno às regras: um erro do LLM conta como erro, não como acerto das regras.
+    parser = get_parser(options.parser, get_settings(), fallback=False)
+    results = evaluate(parser, load_cases(options.cases), july_context())
     summary = summarize(results)
     print(markdown(summary))
     print(
