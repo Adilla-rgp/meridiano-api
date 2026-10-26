@@ -13,6 +13,8 @@ TripStatus = Literal["collecting", "planned", "agreed"]
 Verdict = Literal["accepted", "accepted_with_reservation", "rejected"]
 LimitKind = Literal["date_range", "budget", "exclude_climate", "exclude_destination", "exclude_tags"]
 TensionCriterion = Literal["climate", "dates", "pace"]
+#: CONSTRAINT_PARSER: com "llm", o front avisa que o texto passa por um serviço de IA externo.
+ConstraintParserKind = Literal["rules", "llm"]
 
 ItemId = Annotated[str, Field(min_length=1, max_length=64)]
 Weight = Annotated[float, Field(ge=0, le=1)]
@@ -89,6 +91,7 @@ class TripDetail(Trip):
     destinations: list[Destination]
     members: list[Member]
     latest_round: int | None
+    constraint_parser: ConstraintParserKind
 
 
 class TripCreated(TripDetail):
@@ -254,6 +257,7 @@ class Invite(Schema):
     constraints: Constraints | None
     member_limits: list[MemberLimit]
     latest_round: int | None
+    constraint_parser: ConstraintParserKind
 
 
 # Tensões
