@@ -1,5 +1,5 @@
 {
-  "generated_by": "planner-api scripts/export_fixture.py (engine/tensions.py)",
+  "generated_by": "meridiano-api scripts/export_fixture.py (engine/tensions.py)",
   "rounds": {
     "before_eva_response": {
       "trip_id": "trip-julho",

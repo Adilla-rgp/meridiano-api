@@ -1,6 +1,6 @@
 """
 Roda o motor nos cenários da demonstração da Viagem de julho e grava o resultado
-em JSON no formato do contrato do front (planner-vite/src/types/api.ts). Os mocks
+em JSON no formato do contrato do front (meridiano/src/types/api.ts). Os mocks
 do front leem esse arquivo: o motor é a fonte dos números.
 
 Cenários, na ordem em que a demonstração chega a eles:
@@ -10,7 +10,7 @@ Cenários, na ordem em que a demonstração chega a eles:
 - after_diego_response: mais Diego, que só pode viajar 3 noites (nada é viável).
 
     python -m scripts.export_fixture                       # fixtures/july-trip.json e july-tensions.json
-    python -m scripts.export_fixture --out ../planner-vite/src/mocks/fixtures/july-trip.json
+    python -m scripts.export_fixture --out ../meridiano/src/mocks/fixtures/july-trip.json
 
 Cada rodada traz as restrições de quem respondeu, para o mock escolher a rodada
 que corresponde às respostas salvas, e os planos sem id, trip_id e round, que o
@@ -207,7 +207,7 @@ def _tensions(trip: TripInput) -> dict:
 
 def build_tensions() -> dict:
     return {
-        "generated_by": "planner-api scripts/export_fixture.py (engine/tensions.py)",
+        "generated_by": "meridiano-api scripts/export_fixture.py (engine/tensions.py)",
         "rounds": {name: _tensions(trip) for name, trip in scenarios().items()},
     }
 
@@ -215,7 +215,7 @@ def build_tensions() -> dict:
 def build() -> dict:
     everyone = replace(JULY_TRIP, members=(*JULY_TRIP.members, DIEGO))
     return {
-        "generated_by": "planner-api scripts/export_fixture.py",
+        "generated_by": "meridiano-api scripts/export_fixture.py",
         "trip_id": TRIP_ID,
         "trip": {
             "window_start": _iso(JULY_TRIP.window_start),

@@ -13,7 +13,7 @@ from engine.models import (
     TripInput,
 )
 
-# "Viagem de julho", o mesmo grupo dos mocks do front (planner-vite/src/mocks).
+# "Viagem de julho", o mesmo grupo dos mocks do front (meridiano/src/mocks).
 # Custos decompostos para bater com os valores de 6 noites do catálogo:
 # Lençóis 360 + 6 × 115 = 1050.
 

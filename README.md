@@ -1,10 +1,10 @@
-# planner-api
+# meridiano-api
 
-[![CI](https://github.com/Adilla-rgp/planner-api/actions/workflows/ci.yml/badge.svg)](https://github.com/Adilla-rgp/planner-api/actions/workflows/ci.yml)
+[![CI](https://github.com/Adilla-rgp/meridiano-api/actions/workflows/ci.yml/badge.svg)](https://github.com/Adilla-rgp/meridiano-api/actions/workflows/ci.yml)
 
 API e motor de decisão de um planejador de viagens em grupo. Cada pessoa informa, em particular, o que não abre mão (datas, orçamento, clima, destinos ou tipos de lugar vetados) e o que prefere. O motor calcula o plano mais justo para o grupo e explica, com regras, quem cedeu o quê. O orçamento de cada pessoa nunca é mostrado ao grupo.
 
-Front-end (React + TypeScript): [Adilla-rgp/sitedeviagem](https://github.com/Adilla-rgp/sitedeviagem). Ele também guarda a especificação do produto (`docs/especificacao.md`) e o contrato da API (`src/types/api.ts`). Sem API configurada, o front roda com dados de exemplo gerados por este motor.
+Front-end (React + TypeScript): [Adilla-rgp/meridiano](https://github.com/Adilla-rgp/meridiano). Ele também guarda a especificação do produto (`docs/especificacao.md`) e o contrato da API (`src/types/api.ts`). Sem API configurada, o front roda com dados de exemplo gerados por este motor.
 
 Projeto de portfólio. Stack: Python 3.12, FastAPI, Pydantic 2, SQLAlchemy 2, Alembic, PostgreSQL 16, pytest com testcontainers, ruff e GitHub Actions.
 
@@ -144,7 +144,7 @@ Ao mudar `app/models.py`, gere a migração com um banco no ar:
 Para atualizar os dados de exemplo do front depois de mudar o motor:
 
 ```sh
-.venv/Scripts/python -m scripts.export_fixture --out ../planner-vite/src/mocks/fixtures/july-trip.json
+.venv/Scripts/python -m scripts.export_fixture --out ../meridiano/src/mocks/fixtures/july-trip.json
 ```
 
 ## Referência da API

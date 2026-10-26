@@ -2,7 +2,7 @@
 
 Regras do motor de decisão (`engine/`). O motor é determinístico: a mesma entrada, em qualquer ordem de destinos ou participantes, dá o mesmo resultado. Cada regra abaixo tem teste em `tests/`.
 
-A especificação do produto fica no repositório do front (`planner-vite/docs/especificacao.md`).
+A especificação do produto fica no repositório do front (`meridiano/docs/especificacao.md`).
 
 ## Candidatos
 
@@ -157,7 +157,7 @@ A avaliação do `llm` está pronta (`python -m evals.run --parser llm --cases e
 
 Cada rodada traz as restrições de quem respondeu. O mock do front usa a rodada cujas restrições batem com as respostas salvas. O arquivo também traz o catálogo e os limites de cada pessoa (`member_limits`). Os mocks do front leem uma cópia dele, e um teste falha se o arquivo gravado ficar diferente da saída atual do motor.
 
-Ao lado, o script grava `fixtures/july-tensions.json`: o mapa de tensões de cada cenário, calculado por `engine/tensions.py`, no formato de `GET /trips/{id}/tensions` e com os ids da demonstração. Com `--out ../planner-vite/src/mocks/fixtures/july-trip.json`, os dois arquivos vão para a pasta do front. Um teste também compara este arquivo com a saída atual do motor.
+Ao lado, o script grava `fixtures/july-tensions.json`: o mapa de tensões de cada cenário, calculado por `engine/tensions.py`, no formato de `GET /trips/{id}/tensions` e com os ids da demonstração. Com `--out ../meridiano/src/mocks/fixtures/july-trip.json`, os dois arquivos vão para a pasta do front. Um teste também compara este arquivo com a saída atual do motor.
 
 ## Mapa de tensões
 

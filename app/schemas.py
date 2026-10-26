@@ -3,7 +3,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-# Modelos da API, no formato do contrato do front (planner-vite/src/types/api.ts):
+# Modelos da API, no formato do contrato do front (meridiano/src/types/api.ts):
 # mesmos nomes de campo, em snake_case. Só validação de formato; as regras ficam
 # no motor (engine/).
 

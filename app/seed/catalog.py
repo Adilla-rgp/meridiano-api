@@ -1,6 +1,6 @@
 # Catálogo de destinos do MVP: os quatro da Viagem de julho, com os mesmos
 # custos do motor (tests/fixtures.py) e dos mocks do front
-# (planner-vite/src/mocks/destinations.ts). tests/api/test_seed.py confere.
+# (meridiano/src/mocks/destinations.ts). tests/api/test_seed.py confere.
 #
 # O ritmo é definido à mão; pace_note diz por quê.
 

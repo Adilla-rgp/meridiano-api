@@ -4,7 +4,7 @@ from engine.models import Budget, ExcludeClimate, ExcludeTags
 from engine.tensions import KeyConstraint, MemberPair, tensions
 from tests.fixtures import ANA, BRUNO, CARLA, DIEGO, EVA, trip_with
 
-# Mapa de tensões da Viagem de julho, os mesmos casos de planner-vite/src/mocks/tensions.test.ts.
+# Mapa de tensões da Viagem de julho, os mesmos casos de meridiano/src/mocks/tensions.test.ts.
 
 NAMES = {"mem-ana": "Ana", "mem-bruno": "Bruno", "mem-carla": "Carla", "mem-eva": "Eva", "mem-diego": "Diego"}
 

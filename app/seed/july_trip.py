@@ -1,7 +1,7 @@
 from datetime import date
 
 # "Viagem de julho" de demonstração: o mesmo grupo dos mocks do front
-# (planner-vite/src/mocks/trip-july.ts) e dos testes do motor (tests/fixtures.py).
+# (meridiano/src/mocks/trip-july.ts) e dos testes do motor (tests/fixtures.py).
 # Ana organiza; Ana, Bruno e Carla já responderam; Eva e Diego ainda não.
 # Os resumos das restrições vêm do motor ao salvar. tests/api/test_seed.py
 # confere que as restrições são as mesmas de tests/fixtures.py.

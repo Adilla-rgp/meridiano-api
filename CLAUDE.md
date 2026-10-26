@@ -4,10 +4,10 @@ Contexto permanente para agentes de código neste repositório.
 
 ## O projeto
 
-API e motor de decisão de um planejador de viagens em grupo. Cada participante informa limites e preferências; o motor calcula o plano mais justo e explica quem cedeu o quê. O front fica em outro repositório (planner-vite).
+API e motor de decisão de um planejador de viagens em grupo. Cada participante informa limites e preferências; o motor calcula o plano mais justo e explica quem cedeu o quê. O front fica em outro repositório (meridiano).
 
 - Regras do motor: `docs/motor.md`. Leia antes de mexer em `engine/`.
-- Contrato da API: o formato de referência é `src/types/api.ts` do planner-vite. Mudou o contrato aqui, registre a mudança no resumo final para o front acompanhar.
+- Contrato da API: o formato de referência é `src/types/api.ts` do meridiano. Mudou o contrato aqui, registre a mudança no resumo final para o front acompanhar.
 
 ## Arquitetura
 
