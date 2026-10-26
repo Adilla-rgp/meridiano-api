@@ -1,5 +1,5 @@
 [project]
-name = "planner-api"
+name = "meridiano-api"
 version = "0.1.0"
 description = "API e motor de decisão do planejador de viagens em grupo"
 requires-python = ">=3.12"

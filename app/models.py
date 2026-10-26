@@ -21,7 +21,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-# Tabelas da especificação (planner-vite/docs/especificacao.md, "Modelo de
+# Tabelas da especificação (meridiano/docs/especificacao.md, "Modelo de
 # dados"), mais o que a implementação precisou:
 # - trips.admin_token_hash e members.invite_token_hash: os tokens nunca são
 #   guardados, só o hash (app/security.py);

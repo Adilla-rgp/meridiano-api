@@ -1,5 +1,5 @@
 {
-  "generated_by": "planner-api scripts/export_fixture.py",
+  "generated_by": "meridiano-api scripts/export_fixture.py",
   "trip_id": "trip-julho",
   "trip": {
     "window_start": "2027-07-05",

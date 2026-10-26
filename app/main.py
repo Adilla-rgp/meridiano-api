@@ -10,7 +10,7 @@ from app.settings import Settings, get_settings
 def create_app(settings: Settings | None = None) -> FastAPI:
     """Fábrica da aplicação: uvicorn app.main:create_app --factory."""
     settings = settings or get_settings()
-    app = FastAPI(title="planner-api", version="0.1.0")
+    app = FastAPI(title="meridiano-api", version="0.1.0")
     app.state.settings = settings
     app.state.sessionmaker = make_sessionmaker(settings.database_url)
     app.state.parse_limiter = RateLimiter(settings.parse_rate_limit)
