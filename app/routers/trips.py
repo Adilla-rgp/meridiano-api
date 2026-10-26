@@ -28,15 +28,16 @@ def admin_url(request: Request, trip_id: str, admin_token: str) -> str:
 def create_trip(data: schemas.CreateTripInput, session: SessionDep, request: Request):
     trip, admin_token, organizer_token = services.create_trip(session, data)
     session.commit()
-    detail = queries.trip_detail(session, trip, {trip.organizer_id or "": organizer_token})
+    parser = request.app.state.settings.constraint_parser
+    detail = queries.trip_detail(session, trip, parser, {trip.organizer_id or "": organizer_token})
     return schemas.TripCreated(
         **detail.model_dump(), admin_token=admin_token, admin_url=admin_url(request, trip.id, admin_token)
     )
 
 
 @router.get("/trips/{trip_id}", response_model=schemas.TripDetail)
-def get_trip(trip: AdminTrip, session: SessionDep):
-    return queries.trip_detail(session, trip)
+def get_trip(trip: AdminTrip, session: SessionDep, request: Request):
+    return queries.trip_detail(session, trip, request.app.state.settings.constraint_parser)
 
 
 @router.post("/trips/{trip_id}/members", response_model=list[schemas.Member], status_code=201)

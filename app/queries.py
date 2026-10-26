@@ -56,9 +56,12 @@ def member_schema(member: models.Member, invite_token: str | None = None) -> sch
 
 
 def trip_detail(
-    session: Session, trip: models.Trip, tokens: dict[str, str] | None = None
+    session: Session, trip: models.Trip, constraint_parser: str, tokens: dict[str, str] | None = None
 ) -> schemas.TripDetail:
-    """tokens: os convites recém-criados, por id de participante, para devolver uma única vez."""
+    """
+    constraint_parser: o da configuração. tokens: os convites recém-criados, por id
+    de participante, para devolver uma única vez.
+    """
     tokens = tokens or {}
     return schemas.TripDetail(
         **schemas.Trip.model_validate(trip).model_dump(),
@@ -67,6 +70,7 @@ def trip_detail(
         ],
         members=[member_schema(member, tokens.get(member.id)) for member in trip_members(session, trip.id)],
         latest_round=latest_round(session, trip.id),
+        constraint_parser=constraint_parser,
     )
 
 

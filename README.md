@@ -74,6 +74,8 @@ A pessoa pode escrever do jeito dela ("só posso de 10 a 20 de julho, no máximo
 - `rules` (padrão): regras simples, sem IA.
 - `llm`: um LLM extrai os campos num JSON de formato fixo; o código valida tudo, descarta o que não é da viagem, aplica os pesos e gera os resumos pelo motor. O LLM não escolhe plano, não pontua e não escreve justificativa. Qualquer falha cai nas regras.
 
+`GET /trips/{id}` e `GET /invite/{token}` informam em `constraint_parser` qual dos dois está configurado. Com `llm`, o front avisa que o texto passa por um serviço de IA externo.
+
 Os parsers são medidos em `evals/` com um conjunto de desenvolvimento (49 casos) e um de teste (20 casos, nunca usado em ajuste), em sete categorias: apelidos de destino, dinheiro, negação, datas, texto vazio, tentativa de injeção de instruções e textos mistos.
 
 Linha de base do `rules`:
