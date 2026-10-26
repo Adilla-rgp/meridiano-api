@@ -5,6 +5,7 @@ from engine.models import (
     DateRange,
     ExcludeClimate,
     ExcludeDestination,
+    ExcludeTags,
     PreferClimate,
     PreferDestination,
     PreferPace,
@@ -31,6 +32,8 @@ def test_limits():
     assert both == "Nada de destino quente ou frio"
     veto = hard_summary(ExcludeDestination("h", frozenset({"dest-paraty"})), DESTINATIONS)
     assert veto == "Sem Paraty"
+    tags = hard_summary(ExcludeTags("h", frozenset({"praia", "vida noturna"})), DESTINATIONS)
+    assert tags == "Nada de praia nem vida noturna"
 
 
 def test_preferences():

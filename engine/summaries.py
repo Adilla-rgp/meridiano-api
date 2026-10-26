@@ -8,6 +8,7 @@ from engine.models import (
     Destination,
     ExcludeClimate,
     ExcludeDestination,
+    ExcludeTags,
     HardConstraint,
     PreferClimate,
     PreferDestination,
@@ -85,6 +86,8 @@ def hard_summary(item: HardConstraint, destinations: dict[str, Destination]) -> 
         case ExcludeDestination(destination_ids=ids):
             names = sorted(destinations[i].name if i in destinations else i for i in ids)
             return f"Sem {' nem '.join(names)}"
+        case ExcludeTags(tags=tags):
+            return f"Nada de {' nem '.join(sorted(tags))}"
 
 
 def soft_summary(item: SoftConstraint, destinations: dict[str, Destination]) -> str:

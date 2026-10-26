@@ -11,13 +11,14 @@ Climate = Literal["hot", "mild", "cold"]
 Pace = Literal["relaxed", "balanced", "intense"]
 TripStatus = Literal["collecting", "planned", "agreed"]
 Verdict = Literal["accepted", "accepted_with_reservation", "rejected"]
-LimitKind = Literal["date_range", "budget", "exclude_climate", "exclude_destination"]
+LimitKind = Literal["date_range", "budget", "exclude_climate", "exclude_destination", "exclude_tags"]
 TensionCriterion = Literal["climate", "dates", "pace"]
 
 ItemId = Annotated[str, Field(min_length=1, max_length=64)]
 Weight = Annotated[float, Field(ge=0, le=1)]
 DestinationIds = Annotated[list[str], Field(min_length=1, max_length=4)]
 Climates = Annotated[list[Climate], Field(min_length=1, max_length=3)]
+Tags = Annotated[list[Annotated[str, Field(min_length=1, max_length=40)]], Field(min_length=1, max_length=10)]
 
 MAX_MEMBERS = 8
 MIN_DESTINATIONS = 2
@@ -161,6 +162,11 @@ class ExcludeDestinationItem(Item):
     destination_ids: DestinationIds
 
 
+class ExcludeTagsItem(Item):
+    kind: Literal["exclude_tags"]
+    tags: Tags
+
+
 class PaceItem(Item):
     kind: Literal["pace"]
     pace: Pace
@@ -182,14 +188,13 @@ class PreferDestinationItem(Item):
 
 class PreferTagsItem(Item):
     kind: Literal["prefer_tags"]
-    tags: Annotated[
-        list[Annotated[str, Field(min_length=1, max_length=40)]], Field(min_length=1, max_length=10)
-    ]
+    tags: Tags
     weight: Weight
 
 
 HardConstraint = Annotated[
-    DateRangeItem | BudgetItem | ExcludeClimateItem | ExcludeDestinationItem, Field(discriminator="kind")
+    DateRangeItem | BudgetItem | ExcludeClimateItem | ExcludeDestinationItem | ExcludeTagsItem,
+    Field(discriminator="kind"),
 ]
 SoftConstraint = Annotated[
     PaceItem | PreferClimateItem | PreferDestinationItem | PreferTagsItem, Field(discriminator="kind")

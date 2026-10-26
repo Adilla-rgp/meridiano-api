@@ -4,7 +4,7 @@ from datetime import date
 import pytest
 
 from engine import run
-from engine.models import Budget, DateRange, EngineInputError, Member, MemberLimit
+from engine.models import Budget, DateRange, EngineInputError, ExcludeTags, Member, MemberLimit
 from engine.privacy import limits_for_member
 from tests.fixtures import ANA, BRUNO, CARLA, EVA, JULY_TRIP, trip_with
 
@@ -14,6 +14,8 @@ from tests.fixtures import ANA, BRUNO, CARLA, EVA, JULY_TRIP, trip_with
 TIGHT_EVA = replace(EVA, hard=(*EVA.hard[:1], Budget("eva-h2", 1000, all_inclusive=True), *EVA.hard[2:]))
 BROKE = Member("mem-diego", hard=(Budget("diego-h1", 500, all_inclusive=True),))
 
+NO_BEACH_EVA = replace(EVA, hard=(*EVA.hard, ExcludeTags("eva-h4", frozenset({"praia"}))))
+
 THREE_NIGHTS = Member("mem-diego", hard=(DateRange("diego-h1", date(2027, 7, 12), date(2027, 7, 15)),))
 
 GROUP_SCENARIOS = {
@@ -21,6 +23,7 @@ GROUP_SCENARIOS = {
     "orçamento elimina Paraty": trip_with(members=(ANA, BRUNO, CARLA, TIGHT_EVA)),
     "orçamento inviabiliza tudo": trip_with(members=(ANA, BRUNO, EVA, BROKE)),
     "datas inviabilizam tudo, com orçamento no grupo": trip_with(members=(ANA, BRUNO, EVA, THREE_NIGHTS)),
+    "limite de tag com orçamento no grupo": trip_with(members=(ANA, BRUNO, CARLA, NO_BEACH_EVA)),
 }
 
 

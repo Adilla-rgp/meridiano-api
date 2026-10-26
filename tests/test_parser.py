@@ -100,6 +100,14 @@ def test_tags_climate_and_pace():
     assert (by_kind["pace"]["pace"], by_kind["pace"]["weight"]) == ("intense", 0.8)
 
 
+def test_negated_tag_becomes_a_limit():
+    result = parse("Não quero praia dessa vez, mas curto trilha.")
+    assert result["hard"] == [
+        {"id": "h1", "summary": "Nada de praia", "kind": "exclude_tags", "tags": ["praia"]},
+    ]
+    assert [item["tags"] for item in result["soft"] if item["kind"] == "prefer_tags"] == [["trilhas"]]
+
+
 def test_negated_pace_flips():
     [pace] = parse("nada muito parado, por favor")["soft"]
     assert pace["pace"] == "intense"

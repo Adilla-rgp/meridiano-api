@@ -1,0 +1,256 @@
+{
+  "parser": "rules",
+  "cases_file": "parse_cases.jsonl",
+  "cases": 49,
+  "field_accuracy": {
+    "destinations": 0.8367346938775511,
+    "dates": 0.8367346938775511,
+    "budget": 0.8775510204081632,
+    "climate": 0.9591836734693877,
+    "pace": 0.9591836734693877,
+    "tags": 0.9795918367346939
+  },
+  "category_accuracy": {
+    "apelido": [
+      4,
+      7
+    ],
+    "dinheiro": [
+      3,
+      8
+    ],
+    "negacao": [
+      3,
+      7
+    ],
+    "data": [
+      1,
+      7
+    ],
+    "vazio": [
+      5,
+      6
+    ],
+    "injecao": [
+      5,
+      6
+    ],
+    "misto": [
+      4,
+      8
+    ]
+  },
+  "all_correct": 25,
+  "false_positives": 6,
+  "cases_with_false_positives": 6,
+  "errors": 0,
+  "details": [
+    {
+      "id": "apelido-01",
+      "wrong_fields": [
+        "destinations"
+      ],
+      "false_positives": [],
+      "error": null
+    },
+    {
+      "id": "apelido-04",
+      "wrong_fields": [
+        "destinations"
+      ],
+      "false_positives": [],
+      "error": null
+    },
+    {
+      "id": "apelido-05",
+      "wrong_fields": [
+        "destinations"
+      ],
+      "false_positives": [],
+      "error": null
+    },
+    {
+      "id": "dinheiro-01",
+      "wrong_fields": [
+        "budget"
+      ],
+      "false_positives": [
+        "budget: 800.0, tudo incluso=False"
+      ],
+      "error": null
+    },
+    {
+      "id": "dinheiro-02",
+      "wrong_fields": [
+        "budget"
+      ],
+      "false_positives": [],
+      "error": null
+    },
+    {
+      "id": "dinheiro-04",
+      "wrong_fields": [
+        "budget"
+      ],
+      "false_positives": [],
+      "error": null
+    },
+    {
+      "id": "dinheiro-06",
+      "wrong_fields": [
+        "budget"
+      ],
+      "false_positives": [],
+      "error": null
+    },
+    {
+      "id": "dinheiro-08",
+      "wrong_fields": [
+        "budget"
+      ],
+      "false_positives": [],
+      "error": null
+    },
+    {
+      "id": "negacao-02",
+      "wrong_fields": [
+        "climate"
+      ],
+      "false_positives": [],
+      "error": null
+    },
+    {
+      "id": "negacao-05",
+      "wrong_fields": [
+        "pace"
+      ],
+      "false_positives": [
+        "pace: ('relaxed',)"
+      ],
+      "error": null
+    },
+    {
+      "id": "negacao-06",
+      "wrong_fields": [
+        "destinations",
+        "climate"
+      ],
+      "false_positives": [
+        "destinations: ('prefer', 'dest-paraty')"
+      ],
+      "error": null
+    },
+    {
+      "id": "negacao-07",
+      "wrong_fields": [
+        "destinations"
+      ],
+      "false_positives": [],
+      "error": null
+    },
+    {
+      "id": "data-01",
+      "wrong_fields": [
+        "dates"
+      ],
+      "false_positives": [],
+      "error": null
+    },
+    {
+      "id": "data-02",
+      "wrong_fields": [
+        "dates"
+      ],
+      "false_positives": [],
+      "error": null
+    },
+    {
+      "id": "data-03",
+      "wrong_fields": [
+        "dates"
+      ],
+      "false_positives": [],
+      "error": null
+    },
+    {
+      "id": "data-04",
+      "wrong_fields": [
+        "dates"
+      ],
+      "false_positives": [],
+      "error": null
+    },
+    {
+      "id": "data-05",
+      "wrong_fields": [
+        "dates"
+      ],
+      "false_positives": [],
+      "error": null
+    },
+    {
+      "id": "data-07",
+      "wrong_fields": [
+        "dates"
+      ],
+      "false_positives": [],
+      "error": null
+    },
+    {
+      "id": "vazio-04",
+      "wrong_fields": [
+        "budget"
+      ],
+      "false_positives": [
+        "budget: 2000.0, tudo incluso=False"
+      ],
+      "error": null
+    },
+    {
+      "id": "injecao-03",
+      "wrong_fields": [
+        "destinations"
+      ],
+      "false_positives": [
+        "destinations: ('prefer', 'dest-jericoacoara')"
+      ],
+      "error": null
+    },
+    {
+      "id": "misto-02",
+      "wrong_fields": [
+        "destinations",
+        "dates"
+      ],
+      "false_positives": [],
+      "error": null
+    },
+    {
+      "id": "misto-04",
+      "wrong_fields": [
+        "pace"
+      ],
+      "false_positives": [],
+      "error": null
+    },
+    {
+      "id": "misto-05",
+      "wrong_fields": [
+        "destinations",
+        "dates"
+      ],
+      "false_positives": [],
+      "error": null
+    },
+    {
+      "id": "misto-07",
+      "wrong_fields": [
+        "tags"
+      ],
+      "false_positives": [
+        "tags: ('prefer', 'praia')"
+      ],
+      "error": null
+    }
+  ]
+}

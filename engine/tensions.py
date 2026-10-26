@@ -10,6 +10,7 @@ from engine.models import (
     Destination,
     ExcludeClimate,
     ExcludeDestination,
+    ExcludeTags,
     HardConstraint,
     Member,
     PreferDestination,
@@ -37,7 +38,11 @@ MIN_LIMITS_FOR_MOST_RESTRICTIVE = 2
 #: Ordem de prioridade quando um par conflita em mais de um critério.
 CRITERION_PRIORITY: tuple[TensionCriterion, ...] = ("dates", "climate", "pace")
 
-LIMIT_LABEL = {ExcludeClimate: "O limite de clima", ExcludeDestination: "O veto"}
+LIMIT_LABEL = {
+    ExcludeClimate: "O limite de clima",
+    ExcludeDestination: "O veto",
+    ExcludeTags: "O limite de tipo de destino",
+}
 
 
 @dataclass(frozen=True)

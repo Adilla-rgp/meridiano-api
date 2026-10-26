@@ -63,7 +63,8 @@ InviteMember = Annotated[models.Member, Depends(invite_member)]
 
 
 def parser(request: Request) -> ConstraintParser:
-    return get_parser(request.app.state.settings.constraint_parser)
+    settings = request.app.state.settings
+    return get_parser(settings.constraint_parser, settings)
 
 
 ParserDep = Annotated[ConstraintParser, Depends(parser)]

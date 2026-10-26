@@ -13,6 +13,7 @@ from engine.models import (
     EngineInputError,
     EngineResult,
     ExcludedDestination,
+    ExcludeTags,
     LimitRef,
     Member,
 )
@@ -262,6 +263,17 @@ def test_july_trip_excluded_destinations():
         ExcludedDestination("dest-chapada", "limit", (LimitRef("mem-eva", "exclude_climate"),), None),
         ExcludedDestination("dest-jericoacoara", "lower_score", (), 0.3358),
     )
+
+
+def test_tag_limit_excludes_every_destination_with_that_tag():
+    # Lençóis, Jericoacoara e Paraty têm praia; só a Chapada sobra.
+    no_beach = replace(ANA, hard=(*ANA.hard, ExcludeTags("ana-h9", frozenset({"praia"}))))
+    result = plans_of(run(trip_with(members=(no_beach, BRUNO, CARLA))))
+    assert {plan.destination_id for plan in result.plans} == {"dest-chapada"}
+    assert [item for item in result.excluded_destinations if item.reason == "limit"] == [
+        ExcludedDestination(destination_id, "limit", (LimitRef("mem-ana", "exclude_tags"),), None)
+        for destination_id in ("dest-jericoacoara", "dest-lencois", "dest-paraty")
+    ]
 
 
 def test_budget_exclusion_names_the_limit_but_not_the_value():

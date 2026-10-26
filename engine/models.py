@@ -55,7 +55,15 @@ class ExcludeDestination:
     destination_ids: frozenset[str]
 
 
-HardConstraint = DateRange | Budget | ExcludeClimate | ExcludeDestination
+@dataclass(frozen=True)
+class ExcludeTags:
+    """Nenhum destino com alguma destas tags ("não quero praia")."""
+
+    id: str
+    tags: frozenset[str]
+
+
+HardConstraint = DateRange | Budget | ExcludeClimate | ExcludeDestination | ExcludeTags
 
 
 # Preferências: entram na satisfação com um peso de 0 a 1.
@@ -146,7 +154,7 @@ class PlanResult:
     explanation: tuple[MemberExplanation, ...]
 
 
-LimitKind = Literal["date_range", "budget", "exclude_climate", "exclude_destination"]
+LimitKind = Literal["date_range", "budget", "exclude_climate", "exclude_destination", "exclude_tags"]
 
 
 @dataclass(frozen=True)

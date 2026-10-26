@@ -5,14 +5,15 @@ from datetime import date
 
 from app import schemas
 from app.parsing import ParseContext
+from app.parsing.output import to_schema
 from engine import models as engine
-from engine.summaries import hard_summary, soft_summary
 
 # Interpretação por regras simples, sem IA: datas ("de 8 a 18 de julho",
 # "12/07 a 15/07"), orçamento ("no máximo uns 800 conto", "R$ 1.100"), clima
 # ("não curto frio"), ritmo ("tranquilo", "agito"), destinos da viagem pelo
-# nome e tags dos destinos da viagem. Cobre o básico para a demonstração e para
-# os testes; o LLM entra como outra implementação de ConstraintParser.
+# nome e tags dos destinos da viagem ("quero praia", "não quero praia"). Cobre
+# o básico para a demonstração e para os testes; o LLM entra como outra
+# implementação de ConstraintParser.
 #
 # Trabalha sobre o texto em minúsculas e sem acentos.
 
@@ -140,16 +141,19 @@ class RuleBasedParser:
         excluded_ids, preferred_ids = _destinations(text, context.destinations)
         if excluded_ids:
             hard.append(engine.ExcludeDestination(hard_id(), frozenset(excluded_ids)))
+        excluded_tags, preferred_tags = _tags(text, context.destinations)
+        if excluded_tags:
+            hard.append(engine.ExcludeTags(hard_id(), frozenset(excluded_tags)))
         if preferred_ids:
             soft.append(engine.PreferDestination(soft_id(), tuple(preferred_ids), DESTINATION_WEIGHT))
-        if tags := _tags(text, context.destinations):
-            soft.append(engine.PreferTags(soft_id(), tuple(tags), DEFAULT_WEIGHT))
+        if preferred_tags:
+            soft.append(engine.PreferTags(soft_id(), tuple(preferred_tags), DEFAULT_WEIGHT))
         if preferred_climates:
             soft.append(engine.PreferClimate(soft_id(), frozenset(preferred_climates), DEFAULT_WEIGHT))
         if pace := _pace(text):
             soft.append(engine.PreferPace(soft_id(), *pace))
 
-        return _to_schema(raw_text, hard, soft, context)
+        return to_schema(raw_text, hard, soft, context)
 
 
 def _year(month: int, context: ParseContext) -> int:
@@ -254,72 +258,19 @@ def _destinations(text: _Text, destinations: tuple[engine.Destination, ...]) -> 
     return excluded, preferred
 
 
-def _tags(text: _Text, destinations: tuple[engine.Destination, ...]) -> list[str]:
-    """Tags dos destinos da viagem citadas sem negação, na ordem do texto."""
+def _tags(text: _Text, destinations: tuple[engine.Destination, ...]) -> tuple[list[str], list[str]]:
+    """Tags dos destinos da viagem citadas com negação e sem negação, estas na ordem do texto."""
     vocabulary = sorted({tag for destination in destinations for tag in destination.tags})
+    excluded: list[str] = []
     mentions: list[tuple[int, str]] = []
     for tag in vocabulary:
         stem = normalize(tag)
         stem = stem[:-1] if stem.endswith("s") and len(stem) > 4 else stem
         match = re.search(rf"\b{re.escape(stem)}s?\b", text.value)
-        if match and not text.negated(match.start()):
+        if not match:
+            continue
+        if text.negated(match.start()):
+            excluded.append(tag)
+        else:
             mentions.append((match.start(), tag))
-    return [tag for _, tag in sorted(mentions)]
-
-
-def _to_schema(
-    raw_text: str,
-    hard: list[engine.HardConstraint],
-    soft: list[engine.SoftConstraint],
-    context: ParseContext,
-) -> schemas.ConstraintsInput:
-    """Os itens no formato da API, cada um com o resumo do motor."""
-    by_id = {destination.id: destination for destination in context.destinations}
-    hard_items = [_hard_json(item) | {"summary": hard_summary(item, by_id)} for item in hard]
-    soft_items = [_soft_json(item) | {"summary": soft_summary(item, by_id)} for item in soft]
-    return schemas.ConstraintsInput.model_validate(
-        {"raw_text": raw_text, "hard": hard_items, "soft": soft_items}
-    )
-
-
-def _hard_json(item: engine.HardConstraint) -> dict:
-    match item:
-        case engine.DateRange():
-            return {"id": item.id, "kind": "date_range", "start": item.start, "end": item.end}
-        case engine.Budget():
-            return {
-                "id": item.id,
-                "kind": "budget",
-                "max_per_person": item.max_per_person,
-                "all_inclusive": item.all_inclusive,
-            }
-        case engine.ExcludeClimate():
-            return {"id": item.id, "kind": "exclude_climate", "climates": sorted(item.climates)}
-        case engine.ExcludeDestination():
-            return {
-                "id": item.id,
-                "kind": "exclude_destination",
-                "destination_ids": sorted(item.destination_ids),
-            }
-
-
-def _soft_json(item: engine.SoftConstraint) -> dict:
-    match item:
-        case engine.PreferPace():
-            return {"id": item.id, "kind": "pace", "pace": item.pace, "weight": item.weight}
-        case engine.PreferClimate():
-            return {
-                "id": item.id,
-                "kind": "prefer_climate",
-                "climates": sorted(item.climates),
-                "weight": item.weight,
-            }
-        case engine.PreferDestination():
-            return {
-                "id": item.id,
-                "kind": "prefer_destination",
-                "destination_ids": list(item.destination_ids),
-                "weight": item.weight,
-            }
-        case engine.PreferTags():
-            return {"id": item.id, "kind": "prefer_tags", "tags": list(item.tags), "weight": item.weight}
+    return excluded, [tag for _, tag in sorted(mentions)]
